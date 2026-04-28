@@ -32,6 +32,7 @@ public class CoursesController(
                 .ThenInclude(m => m.Test)
             .Include(c => c.Modules)
                 .ThenInclude(m => m.PracticalTask)
+            .Include(c => c.Tests)
             .FirstOrDefaultAsync(c => c.Id == id && c.IsPublished);
 
         if (course is null)
@@ -42,6 +43,8 @@ public class CoursesController(
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         EnrollmentStatus? enrollmentStatus = null;
         decimal progressPercent = 0;
+        var canGetCertificate = false;
+        int? certificateId = null;
 
         if (!string.IsNullOrEmpty(userId))
         {
@@ -53,14 +56,21 @@ public class CoursesController(
             if (enrollmentStatus == EnrollmentStatus.Approved)
             {
                 progressPercent = await progressService.GetCourseProgressPercentAsync(id, userId);
+                canGetCertificate = await progressService.CanIssueCertificateAsync(id, userId);
+                certificateId = await progressService.GetCertificateIdAsync(id, userId);
             }
         }
+
+        var finalTest = course.Tests.FirstOrDefault(t => t.IsFinal);
 
         return View(new CourseDetailsViewModel
         {
             Course = course,
             EnrollmentStatus = enrollmentStatus,
-            ProgressPercent = progressPercent
+            ProgressPercent = progressPercent,
+            CanGetCertificate = canGetCertificate,
+            CertificateId = certificateId,
+            FinalTest = finalTest
         });
     }
 
@@ -92,6 +102,48 @@ public class CoursesController(
         }
 
         return RedirectToAction(nameof(Details), new { id = courseId });
+    }
+
+    [Authorize(Roles = "Student")]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> GetCertificate(int courseId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        if (!await IsApprovedStudentAsync(courseId))
+        {
+            return Forbid();
+        }
+
+        try
+        {
+            var certificateId = await progressService.IssueCertificateAsync(courseId, userId);
+            TempData["Success"] = "Сертифікат згенеровано.";
+            return RedirectToAction(nameof(Certificate), new { id = certificateId });
+        }
+        catch (InvalidOperationException)
+        {
+            TempData["Error"] = "Умови завершення курсу ще не виконані.";
+            return RedirectToAction(nameof(Details), new { id = courseId });
+        }
+    }
+
+    [Authorize(Roles = "Student")]
+    [HttpGet]
+    public async Task<IActionResult> Certificate(int id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var certificate = await dbContext.Certificates
+            .Include(c => c.Course)
+            .FirstOrDefaultAsync(c => c.Id == id && c.StudentId == userId);
+
+        if (certificate is null)
+        {
+            return NotFound();
+        }
+
+        return View(certificate);
     }
 
     [Authorize(Roles = "Student")]

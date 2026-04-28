@@ -30,7 +30,8 @@ public class StudentController(ApplicationDbContext dbContext, IProgressService 
                 CourseId = enrollment.CourseId,
                 Title = enrollment.Course!.Title,
                 MentorName = $"{enrollment.Course.Mentor?.FirstName} {enrollment.Course.Mentor?.LastName}".Trim(),
-                ProgressPercent = progress
+                ProgressPercent = progress,
+                CertificateId = await progressService.GetCertificateIdAsync(enrollment.CourseId, userId)
             });
         }
 

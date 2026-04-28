@@ -23,6 +23,10 @@ else
                             <div class="progress-bar" role="progressbar" style="width:@course.ProgressPercent%">@course.ProgressPercent%</div>
                         </div>
                         <a class="btn btn-outline-mint btn-sm" asp-controller="Courses" asp-action="Details" asp-route-id="@course.CourseId">Перейти до курсу</a>
+                        @if (course.CertificateId.HasValue)
+                        {
+                            <a class="btn btn-mint btn-sm ms-2" asp-controller="Courses" asp-action="Certificate" asp-route-id="@course.CertificateId.Value">Сертифікат</a>
+                        }
                     </div>
                 </div>
             </div>

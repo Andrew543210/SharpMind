@@ -74,6 +74,9 @@ public class MentorController(ApplicationDbContext dbContext) : Controller
                         .ThenInclude(q => q.AnswerOptions)
             .Include(c => c.Modules)
                 .ThenInclude(m => m.PracticalTask)
+            .Include(c => c.Tests.Where(t => t.IsFinal))
+                .ThenInclude(t => t.Questions)
+                    .ThenInclude(q => q.AnswerOptions)
             .FirstOrDefaultAsync(c => c.Id == courseId && c.MentorId == mentorId);
 
         if (course is null)
@@ -161,6 +164,35 @@ public class MentorController(ApplicationDbContext dbContext) : Controller
         await dbContext.SaveChangesAsync();
 
         TempData["Success"] = "Question added.";
+        return RedirectToAction(nameof(EditCourse), new { courseId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EnsureFinalTest(int courseId, string title)
+    {
+        if (!await OwnsCourseAsync(courseId))
+        {
+            return NotFound();
+        }
+
+        var finalTest = await dbContext.Tests.FirstOrDefaultAsync(t => t.CourseId == courseId && t.IsFinal);
+        if (finalTest is null)
+        {
+            dbContext.Tests.Add(new Test
+            {
+                CourseId = courseId,
+                IsFinal = true,
+                Title = string.IsNullOrWhiteSpace(title) ? "Final course test" : title.Trim()
+            });
+        }
+        else if (!string.IsNullOrWhiteSpace(title))
+        {
+            finalTest.Title = title.Trim();
+        }
+
+        await dbContext.SaveChangesAsync();
+        TempData["Success"] = "Final test updated.";
         return RedirectToAction(nameof(EditCourse), new { courseId });
     }
 

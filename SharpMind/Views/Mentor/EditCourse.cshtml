@@ -34,7 +34,7 @@
             <ul>
                 @foreach (var material in module.Materials)
                 {
-                    <li>@material.Title</li>
+                    <li><strong>@material.Title:</strong> @material.Content</li>
                 }
             </ul>
             <form asp-action="AddMaterial" method="post" class="row g-2 mb-3">
@@ -74,4 +74,40 @@
         </div>
     </div>
 }
+
+<div class="card soft-card mb-3">
+    <div class="card-body">
+        <h5>Фінальний тест курсу</h5>
+        @{
+            var finalTest = Model.Tests.FirstOrDefault(t => t.IsFinal);
+        }
+        <form asp-action="EnsureFinalTest" method="post" class="row g-2 mb-3">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="courseId" value="@Model.Id" />
+            <div class="col-md-8">
+                <input name="title" class="form-control" value="@finalTest?.Title" placeholder="Назва фінального тесту" />
+            </div>
+            <div class="col-md-4 d-grid">
+                <button class="btn btn-mint">Створити / оновити фінальний тест</button>
+            </div>
+        </form>
+
+        @if (finalTest is not null)
+        {
+            <p class="small">Питань у фінальному тесті: @finalTest.Questions.Count</p>
+            <form asp-action="AddQuestion" method="post" class="row g-2">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="courseId" value="@Model.Id" />
+                <input type="hidden" name="testId" value="@finalTest.Id" />
+                <div class="col-12"><input name="text" class="form-control" placeholder="Текст питання" required /></div>
+                <div class="col-md-3"><input name="option1" class="form-control" placeholder="Option 1" required /></div>
+                <div class="col-md-3"><input name="option2" class="form-control" placeholder="Option 2" required /></div>
+                <div class="col-md-3"><input name="option3" class="form-control" placeholder="Option 3" required /></div>
+                <div class="col-md-3"><input name="option4" class="form-control" placeholder="Option 4" required /></div>
+                <div class="col-md-3"><input type="number" min="1" max="4" name="correctOption" class="form-control" placeholder="№ правильної" required /></div>
+                <div class="col-md-3 d-grid"><button class="btn btn-outline-mint">Додати питання</button></div>
+            </form>
+        }
+    </div>
+</div>
 

@@ -18,6 +18,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<PracticalSubmission> PracticalSubmissions => Set<PracticalSubmission>();
     public DbSet<TestResult> TestResults => Set<TestResult>();
     public DbSet<Enrollment> Enrollments => Set<Enrollment>();
+    public DbSet<Certificate> Certificates => Set<Certificate>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -49,6 +50,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasOne(t => t.Module)
             .WithOne(m => m.Test)
             .HasForeignKey<Test>(t => t.ModuleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<Test>()
+            .HasOne(t => t.Course)
+            .WithMany(c => c.Tests)
+            .HasForeignKey(t => t.CourseId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Entity<Question>()
@@ -111,6 +118,26 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         builder.Entity<Enrollment>()
             .HasIndex(e => new { e.CourseId, e.StudentId })
+            .IsUnique();
+
+        builder.Entity<Certificate>()
+            .HasOne(c => c.Course)
+            .WithMany(c => c.Certificates)
+            .HasForeignKey(c => c.CourseId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<Certificate>()
+            .HasOne(c => c.Student)
+            .WithMany()
+            .HasForeignKey(c => c.StudentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Certificate>()
+            .HasIndex(c => new { c.CourseId, c.StudentId })
+            .IsUnique();
+
+        builder.Entity<Certificate>()
+            .HasIndex(c => c.UniqueNumber)
             .IsUnique();
     }
 }

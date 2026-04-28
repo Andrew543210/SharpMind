@@ -31,5 +31,7 @@ public class Course
 
     public ICollection<CourseModule> Modules { get; set; } = new List<CourseModule>();
     public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
+    public ICollection<Test> Tests { get; set; } = new List<Test>();
+    public ICollection<Certificate> Certificates { get; set; } = new List<Certificate>();
 }
 

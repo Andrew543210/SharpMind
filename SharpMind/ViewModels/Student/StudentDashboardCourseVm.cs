@@ -6,5 +6,6 @@ public class StudentDashboardCourseVm
     public string Title { get; set; } = string.Empty;
     public string MentorName { get; set; } = string.Empty;
     public decimal ProgressPercent { get; set; }
+    public int? CertificateId { get; set; }
 }
 

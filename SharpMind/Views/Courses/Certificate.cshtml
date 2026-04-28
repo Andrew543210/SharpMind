@@ -1,0 +1,51 @@
+@model Certificate
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Сертифікат";
+}
+
+<style>
+    .certificate-wrap {
+        max-width: 900px;
+        margin: 24px auto;
+        padding: 40px;
+        background: linear-gradient(135deg, #f8fffd 0%, #e9fff8 100%);
+        border: 2px solid #8fe5d2;
+        border-radius: 16px;
+        box-shadow: 0 12px 30px rgba(15, 85, 70, .12);
+    }
+
+    .certificate-title {
+        color: #0f5d4e;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    .certificate-subtitle {
+        color: #2c7d6d;
+    }
+
+    @@media print {
+        .navbar, footer, .btn {
+            display: none !important;
+        }
+
+        .certificate-wrap {
+            margin: 0;
+            box-shadow: none;
+            border: 1px solid #8fe5d2;
+        }
+    }
+</style>
+
+<div class="certificate-wrap text-center">
+    <h1 class="certificate-title">Certificate of Completion</h1>
+    <p class="certificate-subtitle mt-3 mb-4">This certifies that</p>
+    <h2 class="mb-4">@Model.FullName</h2>
+    <p class="mb-2">has successfully completed the course</p>
+    <h3 class="mb-4">@Model.CourseName</h3>
+    <p class="mb-1"><strong>Platform:</strong> @Model.PlatformName</p>
+    <p class="mb-1"><strong>Issued:</strong> @Model.IssueDate.ToString("yyyy-MM-dd")</p>
+    <p class="mb-4"><strong>Certificate No:</strong> @Model.UniqueNumber</p>
+    <button class="btn btn-mint" onclick="window.print()">Друк / Зберегти PDF</button>
+</div>

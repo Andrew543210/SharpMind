@@ -3,6 +3,30 @@
 @{
     ViewData["Title"] = Model.Course.Title;
     var isApproved = Model.EnrollmentStatus == EnrollmentStatus.Approved;
+
+    static (bool IsLink, string Text, string Url) ParseMaterial(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return (false, string.Empty, string.Empty);
+        }
+
+        var startText = raw.IndexOf('[');
+        var endText = raw.IndexOf("](");
+        var endUrl = raw.LastIndexOf(')');
+
+        if (startText == 0 && endText > 1 && endUrl > endText + 2)
+        {
+            var text = raw[1..endText];
+            var url = raw[(endText + 2)..endUrl];
+            if (url.StartsWith("http://") || url.StartsWith("https://"))
+            {
+                return (true, text, url);
+            }
+        }
+
+        return (false, raw, string.Empty);
+    }
 }
 
 <div class="card soft-card mb-3">
@@ -39,6 +63,28 @@
                     <div class="progress-bar" role="progressbar" style="width:@Model.ProgressPercent%">@Model.ProgressPercent%</div>
                 </div>
             </div>
+
+            @if (Model.FinalTest is not null)
+            {
+                <div class="mt-3">
+                    <a class="btn btn-outline-mint btn-sm" asp-action="TakeTest" asp-route-testId="@Model.FinalTest.Id" asp-route-courseId="@Model.Course.Id">Пройти фінальний тест</a>
+                </div>
+            }
+
+            <div class="mt-3">
+                @if (Model.CertificateId.HasValue)
+                {
+                    <a class="btn btn-mint btn-sm" asp-action="Certificate" asp-route-id="@Model.CertificateId.Value">Переглянути сертифікат</a>
+                }
+                else if (Model.CanGetCertificate)
+                {
+                    <form asp-action="GetCertificate" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="courseId" value="@Model.Course.Id" />
+                        <button class="btn btn-mint btn-sm">Отримати сертифікат</button>
+                    </form>
+                }
+            </div>
         }
     </div>
 </div>
@@ -61,7 +107,18 @@
                         <ul>
                             @foreach (var material in module.Materials)
                             {
-                                <li><strong>@material.Title:</strong> @material.Content</li>
+                                var parsed = ParseMaterial(material.Content);
+                                <li>
+                                    <strong>@material.Title:</strong>
+                                    @if (parsed.IsLink)
+                                    {
+                                        <a href="@parsed.Url" target="_blank" rel="noopener noreferrer">@parsed.Text</a>
+                                    }
+                                    else
+                                    {
+                                        @parsed.Text
+                                    }
+                                </li>
                             }
                         </ul>
 
