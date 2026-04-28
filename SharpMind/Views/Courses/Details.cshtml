@@ -1,0 +1,91 @@
+﻿@using System.Security.Claims
+@model CourseDetailsViewModel
+@{
+    ViewData["Title"] = Model.Course.Title;
+    var isApproved = Model.EnrollmentStatus == EnrollmentStatus.Approved;
+}
+
+<div class="card soft-card mb-3">
+    <div class="card-body">
+        <h1 class="h3">@Model.Course.Title</h1>
+        <p>@Model.Course.Description</p>
+        <p class="text-muted small">Тема: @Model.Course.Topic | Рівень: @Model.Course.Level | Ціна: @Model.Course.Price USD</p>
+
+        @if (User.IsInRole(AppRoles.Student))
+        {
+            if (Model.EnrollmentStatus is null)
+            {
+                <form asp-action="RequestEnrollment" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="courseId" value="@Model.Course.Id" />
+                    <button class="btn btn-mint">Подати заявку на курс</button>
+                </form>
+            }
+            else if (Model.EnrollmentStatus == EnrollmentStatus.Pending)
+            {
+                <div class="alert alert-warning mb-0">Заявка на курс на розгляді.</div>
+            }
+            else if (Model.EnrollmentStatus == EnrollmentStatus.Rejected)
+            {
+                <div class="alert alert-danger mb-0">Заявку відхилено ментором.</div>
+            }
+        }
+
+        @if (isApproved)
+        {
+            <div class="mt-3">
+                <label class="form-label">Загальний прогрес: @Model.ProgressPercent%</label>
+                <div class="progress mint-progress">
+                    <div class="progress-bar" role="progressbar" style="width:@Model.ProgressPercent%">@Model.ProgressPercent%</div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@if (isApproved || User.IsInRole(AppRoles.Mentor) || User.IsInRole(AppRoles.Admin))
+{
+    <div class="accordion" id="moduleAccordion">
+        @foreach (var module in Model.Course.Modules.OrderBy(m => m.Order))
+        {
+            <div class="accordion-item mb-2">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#m-@module.Id">
+                        @module.Order. @module.Title
+                    </button>
+                </h2>
+                <div id="m-@module.Id" class="accordion-collapse collapse" data-bs-parent="#moduleAccordion">
+                    <div class="accordion-body">
+                        <p>@module.Description</p>
+                        <h6>Матеріали</h6>
+                        <ul>
+                            @foreach (var material in module.Materials)
+                            {
+                                <li><strong>@material.Title:</strong> @material.Content</li>
+                            }
+                        </ul>
+
+                        @if (module.Test is not null && User.IsInRole(AppRoles.Student) && isApproved)
+                        {
+                            <a class="btn btn-outline-mint btn-sm mb-3" asp-action="TakeTest" asp-route-testId="@module.Test.Id" asp-route-courseId="@Model.Course.Id">Пройти тест</a>
+                        }
+
+                        @if (module.PracticalTask is not null && User.IsInRole(AppRoles.Student) && isApproved)
+                        {
+                            <h6>Практичне завдання: @module.PracticalTask.Title</h6>
+                            <p>@module.PracticalTask.Description</p>
+                            <form asp-action="SubmitTask" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="TaskId" value="@module.PracticalTask.Id" />
+                                <input type="hidden" name="CourseId" value="@Model.Course.Id" />
+                                <textarea name="AnswerText" class="form-control mb-2" rows="3" placeholder="Ваша відповідь"></textarea>
+                                <button class="btn btn-mint btn-sm">Надіслати відповідь</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+

@@ -1,0 +1,92 @@
+﻿@using SharpMind.Models.Identity
+@{
+    ViewData["Title"] = "Адмін панель";
+    var users = ViewBag.Users as List<ApplicationUser> ?? [];
+    var courses = ViewBag.Courses as List<Course> ?? [];
+    var mentors = ViewBag.Mentors as List<ApplicationUser> ?? [];
+}
+
+<h1 class="h3 mb-3">Адмін панель</h1>
+<a class="btn btn-mint mb-3" asp-action="CreateMentor">Створити ментора</a>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card soft-card">
+            <div class="card-body">
+                <h5>Користувачі</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead><tr><th>Email</th><th>Role</th><th>Дії</th></tr></thead>
+                        <tbody>
+                        @foreach (var user in users)
+                        {
+                            <tr>
+                                <td>@user.Email</td>
+                                <td><a asp-action="ManageRole" asp-route-userId="@user.Id" class="link-success">Змінити роль</a></td>
+                                <td>
+                                    <form asp-action="DeleteUser" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="userId" value="@user.Id" />
+                                        <button class="btn btn-sm btn-outline-danger">Видалити</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card soft-card">
+            <div class="card-body">
+                <h5>Курси</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead><tr><th>Курс</th><th>Ментор</th><th>Призначення</th><th></th></tr></thead>
+                        <tbody>
+                        @foreach (var course in courses)
+                        {
+                            <tr>
+                                <td>@course.Title</td>
+                                <td>@course.Mentor?.Email</td>
+                                <td>
+                                    <form asp-action="AssignMentor" method="post" class="d-flex gap-1">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="courseId" value="@course.Id" />
+                                        <select name="mentorId" class="form-select form-select-sm">
+                                            @foreach (var mentor in mentors)
+                                            {
+                                                if (mentor.Id == course.MentorId)
+                                                {
+                                                    <option value="@mentor.Id" selected>@mentor.Email</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@mentor.Id">@mentor.Email</option>
+                                                }
+                                            }
+                                        </select>
+                                        <button class="btn btn-sm btn-outline-mint">OK</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form asp-action="DeleteCourse" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="courseId" value="@course.Id" />
+                                        <button class="btn btn-sm btn-outline-danger">Видалити</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

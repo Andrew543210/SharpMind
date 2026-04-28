@@ -1,0 +1,40 @@
+﻿@model List<PracticalSubmission>
+@{
+    ViewData["Title"] = "Практичні відповіді";
+}
+
+<h1 class="h3 mb-3">Відповіді студентів</h1>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Надсилань поки немає.</div>
+}
+else
+{
+    @foreach (var s in Model)
+    {
+        <div class="card soft-card mb-3">
+            <div class="card-body">
+                <h5>@s.Task!.Module!.Course!.Title - @s.Task.Title</h5>
+                <p class="small text-muted">Студент: @s.Student!.Email | @s.SubmittedAt.ToLocalTime().ToString("g")</p>
+                <p>@s.AnswerText</p>
+                <p class="small">Статус: <strong>@s.Status</strong></p>
+
+                <form asp-action="GradeSubmission" method="post" class="row g-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="SubmissionId" value="@s.Id" />
+                    <div class="col-md-2">
+                        <input name="Grade" value="@(s.Grade ?? 0)" class="form-control" type="number" min="0" max="100" />
+                    </div>
+                    <div class="col-md-7">
+                        <input name="MentorComment" value="@s.MentorComment" class="form-control" placeholder="Коментар" />
+                    </div>
+                    <div class="col-md-3 d-grid">
+                        <button class="btn btn-mint btn-sm">Зберегти оцінку</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+}
+

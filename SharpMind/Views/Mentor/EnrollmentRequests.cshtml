@@ -1,0 +1,51 @@
+﻿@model List<Enrollment>
+@{
+    ViewData["Title"] = "Заявки студентів";
+}
+
+<h1 class="h3 mb-3">Заявки на enrollment</h1>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Немає заявок на розгляд.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+            <tr>
+                <th>Курс</th>
+                <th>Студент</th>
+                <th>Дата</th>
+                <th>Дії</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Course!.Title</td>
+                    <td>@item.Student!.Email</td>
+                    <td>@item.RequestedAt.ToLocalTime().ToString("g")</td>
+                    <td class="d-flex gap-2">
+                        <form asp-action="SetEnrollmentStatus" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="enrollmentId" value="@item.Id" />
+                            <input type="hidden" name="status" value="Approved" />
+                            <button class="btn btn-sm btn-success">Підтвердити</button>
+                        </form>
+                        <form asp-action="SetEnrollmentStatus" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="enrollmentId" value="@item.Id" />
+                            <input type="hidden" name="status" value="Rejected" />
+                            <button class="btn btn-sm btn-danger">Відхилити</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
+

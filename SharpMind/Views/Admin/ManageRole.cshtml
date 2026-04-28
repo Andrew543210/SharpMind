@@ -1,0 +1,28 @@
+﻿@model SharpMind.ViewModels.Admin.ManageRoleViewModel
+@{
+    ViewData["Title"] = "Управління роллю";
+}
+
+<div class="card soft-card">
+    <div class="card-body">
+        <h1 class="h4">Роль користувача @Model.Email</h1>
+        <form asp-action="ManageRole" method="post" class="row g-2">
+            @Html.AntiForgeryToken()
+            <input asp-for="UserId" type="hidden" />
+            <div class="col-md-6">
+                <label asp-for="SelectedRole" class="form-label"></label>
+                <select asp-for="SelectedRole" class="form-select">
+                    @foreach (var role in Model.Roles)
+                    {
+                        <option value="@role">@role</option>
+                    }
+                </select>
+                <span asp-validation-for="SelectedRole" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                <button class="btn btn-mint">Зберегти</button>
+            </div>
+        </form>
+    </div>
+</div>
+

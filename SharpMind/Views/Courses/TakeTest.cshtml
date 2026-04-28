@@ -1,0 +1,44 @@
+﻿@model TakeTestViewModel
+@{
+    ViewData["Title"] = "Проходження тесту";
+}
+
+<div class="card soft-card">
+    <div class="card-body">
+        <h1 class="h4 mb-3">@Model.TestTitle</h1>
+
+        <form asp-action="TakeTest" method="post">
+            @Html.AntiForgeryToken()
+            <input asp-for="TestId" type="hidden" />
+            <input asp-for="CourseId" type="hidden" />
+
+            @for (var i = 0; i < Model.Questions.Count; i++)
+            {
+                <div class="mb-4 border-bottom pb-3">
+                    <input asp-for="Questions[i].QuestionId" type="hidden" />
+                    <input asp-for="Questions[i].Text" type="hidden" />
+                    <label class="fw-semibold d-block mb-2">@(i + 1). @Model.Questions[i].Text</label>
+                    @for (var j = 0; j < Model.Questions[i].Options.Count; j++)
+                    {
+                        <input type="hidden" asp-for="Questions[i].Options[j].OptionId" />
+                        <input type="hidden" asp-for="Questions[i].Options[j].Text" />
+                        <div class="form-check mb-1">
+                            <input class="form-check-input" type="radio" asp-for="Questions[i].SelectedOptionId" value="@Model.Questions[i].Options[j].OptionId" id="q@(i)_o@(j)">
+                            <label class="form-check-label" for="q@(i)_o@(j)">@Model.Questions[i].Options[j].Text</label>
+                        </div>
+                    }
+                    <span asp-validation-for="Questions[i].SelectedOptionId" class="text-danger"></span>
+                </div>
+            }
+
+            <button class="btn btn-mint" type="submit">Завершити тест</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}
+
+

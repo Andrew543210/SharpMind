@@ -1,0 +1,81 @@
+﻿<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SharpMind</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/SharpMind.styles.css" asp-append-version="true" />
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-light shadow-sm border-bottom mint-navbar">
+        <div class="container">
+            <a class="navbar-brand fw-semibold" asp-controller="Courses" asp-action="Index">SharpMind</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" asp-controller="Courses" asp-action="Index">Каталог</a></li>
+                    @if (User.IsInRole(AppRoles.Student))
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Student" asp-action="Dashboard">Мій кабінет</a></li>
+                    }
+                    @if (User.IsInRole(AppRoles.Mentor))
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Mentor" asp-action="Dashboard">Панель ментора</a></li>
+                    }
+                    @if (User.IsInRole(AppRoles.Admin))
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Admin" asp-action="Dashboard">Адмін панель</a></li>
+                    }
+                </ul>
+                <ul class="navbar-nav">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li class="nav-item d-flex align-items-center me-2 text-muted small">@User.Identity.Name</li>
+                        <li class="nav-item">
+                            <form asp-controller="Account" asp-action="Logout" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-mint btn-sm">Вийти</button>
+                            </form>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Login">Вхід</a></li>
+                        <li class="nav-item"><a class="btn btn-mint btn-sm mt-1 ms-lg-2" asp-controller="Account" asp-action="Register">Реєстрація</a></li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<div class="container py-3">
+    @if (TempData["Success"] is string success)
+    {
+        <div class="alert alert-success">@success</div>
+    }
+    @if (TempData["Error"] is string error)
+    {
+        <div class="alert alert-danger">@error</div>
+    }
+    <main role="main" class="pb-3">
+        @RenderBody()
+    </main>
+</div>
+
+<footer class="footer text-muted border-top py-3">
+    <div class="container">&copy; 2026 - SharpMind</div>
+</footer>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

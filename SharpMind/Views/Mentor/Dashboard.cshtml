@@ -1,0 +1,32 @@
+﻿@model List<Course>
+@{
+    ViewData["Title"] = "Панель ментора";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Мої курси</h1>
+    <a class="btn btn-mint" asp-action="CreateCourse">Створити курс</a>
+</div>
+
+<div class="row g-3">
+    @foreach (var course in Model)
+    {
+        <div class="col-md-6">
+            <div class="card soft-card h-100">
+                <div class="card-body">
+                    <h5>@course.Title</h5>
+                    <p class="small text-muted">@course.Topic | @course.Level</p>
+                    <p>@course.Description</p>
+                    <p class="small">Модулі: @course.Modules.Count | Студенти: @course.Enrollments.Count(e => e.Status == EnrollmentStatus.Approved)</p>
+                    <a class="btn btn-outline-mint btn-sm" asp-action="EditCourse" asp-route-courseId="@course.Id">Редагувати курс</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="mt-4 d-flex gap-2">
+    <a class="btn btn-outline-mint" asp-action="EnrollmentRequests">Заявки на enrollment</a>
+    <a class="btn btn-outline-mint" asp-action="Submissions">Практичні відповіді</a>
+</div>
+

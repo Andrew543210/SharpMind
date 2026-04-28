@@ -1,0 +1,32 @@
+﻿@model List<SharpMind.ViewModels.Student.StudentDashboardCourseVm>
+@{
+    ViewData["Title"] = "Мій кабінет";
+}
+
+<h1 class="h3 mb-3">Мій кабінет</h1>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">У вас ще немає підтверджених курсів.</div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var course in Model)
+        {
+            <div class="col-md-6">
+                <div class="card soft-card h-100">
+                    <div class="card-body">
+                        <h5>@course.Title</h5>
+                        <p class="small text-muted mb-2">Ментор: @course.MentorName</p>
+                        <div class="progress mint-progress mb-2">
+                            <div class="progress-bar" role="progressbar" style="width:@course.ProgressPercent%">@course.ProgressPercent%</div>
+                        </div>
+                        <a class="btn btn-outline-mint btn-sm" asp-controller="Courses" asp-action="Details" asp-route-id="@course.CourseId">Перейти до курсу</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+

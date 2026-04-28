@@ -1,0 +1,81 @@
+:root {
+  --mint-bg: #f4f9f4;
+  --mint-surface: #ffffff;
+  --mint-accent: #a3d9a5;
+  --mint-dark: #6b8e6b;
+  --mint-border: #d8ead8;
+}
+
+html {
+  font-size: 15px;
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  background: var(--mint-bg);
+  color: #1f2a1f;
+}
+
+.mint-navbar {
+  background: var(--mint-surface);
+}
+
+.soft-card {
+  background: var(--mint-surface);
+  border: 1px solid var(--mint-border);
+  border-radius: 0.9rem;
+  box-shadow: 0 6px 20px rgba(108, 142, 108, 0.08);
+}
+
+.course-card {
+  background: var(--mint-surface);
+  border: 1px solid var(--mint-border);
+  border-radius: 0.9rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.course-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(108, 142, 108, 0.12);
+}
+
+.btn-mint {
+  background: var(--mint-dark);
+  border-color: var(--mint-dark);
+  color: #fff;
+}
+
+.btn-mint:hover,
+.btn-mint:focus {
+  background: #5a7d5a;
+  border-color: #5a7d5a;
+  color: #fff;
+}
+
+.btn-outline-mint {
+  border-color: var(--mint-dark);
+  color: var(--mint-dark);
+}
+
+.btn-outline-mint:hover {
+  background: var(--mint-dark);
+  color: #fff;
+}
+
+.mint-progress {
+  height: 1.2rem;
+  background: #e6f3e6;
+}
+
+.mint-progress .progress-bar {
+  background: linear-gradient(90deg, #87c58a, var(--mint-dark));
+}
+
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus,
+.btn:focus {
+  border-color: var(--mint-accent);
+  box-shadow: 0 0 0 0.2rem rgba(163, 217, 165, 0.35);
+}

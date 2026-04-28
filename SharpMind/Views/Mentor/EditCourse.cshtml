@@ -1,0 +1,77 @@
+﻿@model Course
+@{
+    ViewData["Title"] = "Редагування курсу";
+}
+
+<div class="card soft-card mb-3">
+    <div class="card-body">
+        <h1 class="h4">@Model.Title</h1>
+        <p>@Model.Description</p>
+    </div>
+</div>
+
+<div class="card soft-card mb-3">
+    <div class="card-body">
+        <h5>Додати модуль</h5>
+        <form asp-action="AddModule" method="post" class="row g-2">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="courseId" value="@Model.Id" />
+            <div class="col-md-4"><input name="title" class="form-control" placeholder="Назва модуля" required /></div>
+            <div class="col-md-6"><input name="description" class="form-control" placeholder="Опис модуля" required /></div>
+            <div class="col-md-2 d-grid"><button class="btn btn-mint">Додати</button></div>
+        </form>
+    </div>
+</div>
+
+@foreach (var module in Model.Modules.OrderBy(m => m.Order))
+{
+    <div class="card soft-card mb-3">
+        <div class="card-body">
+            <h5>@module.Order. @module.Title</h5>
+            <p>@module.Description</p>
+
+            <h6>Матеріали</h6>
+            <ul>
+                @foreach (var material in module.Materials)
+                {
+                    <li>@material.Title</li>
+                }
+            </ul>
+            <form asp-action="AddMaterial" method="post" class="row g-2 mb-3">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="courseId" value="@Model.Id" />
+                <input type="hidden" name="moduleId" value="@module.Id" />
+                <div class="col-md-3"><input name="title" class="form-control" placeholder="Назва матеріалу" required /></div>
+                <div class="col-md-7"><input name="content" class="form-control" placeholder="Текст/URL" required /></div>
+                <div class="col-md-2 d-grid"><button class="btn btn-outline-mint">Додати</button></div>
+            </form>
+
+            @if (module.Test is not null)
+            {
+                <h6>Тест: @module.Test.Title</h6>
+                <p class="small">Питань: @module.Test.Questions.Count</p>
+                <form asp-action="AddQuestion" method="post" class="row g-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="courseId" value="@Model.Id" />
+                    <input type="hidden" name="testId" value="@module.Test.Id" />
+                    <div class="col-12"><input name="text" class="form-control" placeholder="Текст питання" required /></div>
+                    <div class="col-md-3"><input name="option1" class="form-control" placeholder="Option 1" required /></div>
+                    <div class="col-md-3"><input name="option2" class="form-control" placeholder="Option 2" required /></div>
+                    <div class="col-md-3"><input name="option3" class="form-control" placeholder="Option 3" required /></div>
+                    <div class="col-md-3"><input name="option4" class="form-control" placeholder="Option 4" required /></div>
+                    <div class="col-md-3"><input type="number" min="1" max="4" name="correctOption" class="form-control" placeholder="№ правильної" required /></div>
+                    <div class="col-md-3 d-grid"><button class="btn btn-outline-mint">Додати питання</button></div>
+                </form>
+            }
+
+            @if (module.PracticalTask is not null)
+            {
+                <div class="mt-3">
+                    <h6>Практичне завдання</h6>
+                    <p class="mb-0">@module.PracticalTask.Title - @module.PracticalTask.Description</p>
+                </div>
+            }
+        </div>
+    </div>
+}
+

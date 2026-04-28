@@ -1,0 +1,5 @@
+﻿.idea/
+SharpMind/sharpmind.db
+bin/
+obj/
+*.user
