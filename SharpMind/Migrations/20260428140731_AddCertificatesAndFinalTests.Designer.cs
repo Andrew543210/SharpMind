@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SharpMind.Data;
 
@@ -10,9 +11,11 @@ using SharpMind.Data;
 namespace SharpMind.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260428140731_AddCertificatesAndFinalTests")]
+    partial class AddCertificatesAndFinalTests
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
@@ -180,14 +183,6 @@ namespace SharpMind.Migrations
 
                     b.Property<string>("CourseName")
                         .IsRequired()
-<<<<<<< Updated upstream
-                        .HasMaxLength(120)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-=======
->>>>>>> Stashed changes
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
@@ -196,16 +191,12 @@ namespace SharpMind.Migrations
 
                     b.Property<string>("PlatformName")
                         .IsRequired()
-<<<<<<< Updated upstream
-                        .HasMaxLength(120)
-=======
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("StudentFullName")
                         .IsRequired()
                         .HasMaxLength(200)
->>>>>>> Stashed changes
                         .HasColumnType("TEXT");
 
                     b.Property<string>("StudentId")
@@ -217,21 +208,10 @@ namespace SharpMind.Migrations
 
                     b.HasKey("Id");
 
-<<<<<<< Updated upstream
-                    b.HasIndex("StudentId");
-
-                    b.HasIndex("UniqueNumber")
-                        .IsUnique();
-
-                    b.HasIndex("CourseId", "StudentId")
-                        .IsUnique();
-
-=======
                     b.HasIndex("CourseId");
 
                     b.HasIndex("StudentId");
 
->>>>>>> Stashed changes
                     b.ToTable("Certificates");
                 });
 
@@ -538,11 +518,7 @@ namespace SharpMind.Migrations
                     b.Property<int?>("CourseId")
                         .HasColumnType("INTEGER");
 
-<<<<<<< Updated upstream
-                    b.Property<bool>("IsFinal")
-=======
                     b.Property<bool>("IsFinalTest")
->>>>>>> Stashed changes
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("ModuleId")
@@ -657,11 +633,7 @@ namespace SharpMind.Migrations
             modelBuilder.Entity("SharpMind.Models.Certificate", b =>
                 {
                     b.HasOne("SharpMind.Models.Course", "Course")
-<<<<<<< Updated upstream
-                        .WithMany("Certificates")
-=======
                         .WithMany()
->>>>>>> Stashed changes
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -669,11 +641,7 @@ namespace SharpMind.Migrations
                     b.HasOne("SharpMind.Models.Identity.ApplicationUser", "Student")
                         .WithMany()
                         .HasForeignKey("StudentId")
-<<<<<<< Updated upstream
-                        .OnDelete(DeleteBehavior.Restrict)
-=======
                         .OnDelete(DeleteBehavior.Cascade)
->>>>>>> Stashed changes
                         .IsRequired();
 
                     b.Navigation("Course");
@@ -777,11 +745,7 @@ namespace SharpMind.Migrations
             modelBuilder.Entity("SharpMind.Models.Test", b =>
                 {
                     b.HasOne("SharpMind.Models.Course", "Course")
-<<<<<<< Updated upstream
-                        .WithMany("Tests")
-=======
                         .WithMany()
->>>>>>> Stashed changes
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade);
 
@@ -816,13 +780,9 @@ namespace SharpMind.Migrations
 
             modelBuilder.Entity("SharpMind.Models.Course", b =>
                 {
-                    b.Navigation("Certificates");
-
                     b.Navigation("Enrollments");
 
                     b.Navigation("Modules");
-
-                    b.Navigation("Tests");
                 });
 
             modelBuilder.Entity("SharpMind.Models.CourseModule", b =>

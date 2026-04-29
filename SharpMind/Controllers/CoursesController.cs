@@ -56,10 +56,16 @@ public class CoursesController(
             if (enrollmentStatus == EnrollmentStatus.Approved)
             {
                 progressPercent = await progressService.GetCourseProgressPercentAsync(id, userId);
+<<<<<<< Updated upstream
                 canGetCertificate = await progressService.CanIssueCertificateAsync(id, userId);
                 certificateId = await progressService.GetCertificateIdAsync(id, userId);
             }
         }
+=======
+                isCompleted = await progressService.IsCourseCompletedAsync(id, userId);
+
+            .FirstOrDefaultAsync(t => t.CourseId == id && t.IsFinalTest);
+>>>>>>> Stashed changes
 
         var finalTest = course.Tests.FirstOrDefault(t => t.IsFinal);
 
@@ -68,9 +74,14 @@ public class CoursesController(
             Course = course,
             EnrollmentStatus = enrollmentStatus,
             ProgressPercent = progressPercent,
+<<<<<<< Updated upstream
             CanGetCertificate = canGetCertificate,
             CertificateId = certificateId,
             FinalTest = finalTest
+=======
+            FinalTest = finalTest,
+            CertificateId = certificateId
+>>>>>>> Stashed changes
         });
     }
 
@@ -80,13 +91,7 @@ public class CoursesController(
     public async Task<IActionResult> RequestEnrollment(int courseId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId))
-        {
-            return Challenge();
-        }
-
-        var existing = await dbContext.Enrollments
-            .FirstOrDefaultAsync(e => e.CourseId == courseId && e.StudentId == userId);
+            ProgressPercent = progressPercent
 
         if (existing is null)
         {
