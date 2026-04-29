@@ -6,5 +6,7 @@ public interface IProgressService
     Task<bool> CanIssueCertificateAsync(int courseId, string studentId);
     Task<int?> GetCertificateIdAsync(int courseId, string studentId);
     Task<int> IssueCertificateAsync(int courseId, string studentId);
+    Task<CourseRatingSummary> GetCourseRatingSummaryAsync(int courseId, string studentId);
+    Task<IReadOnlyList<CourseRatingEntry>> GetCourseRatingEntriesAsync(int courseId);
 }
 

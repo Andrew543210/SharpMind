@@ -10,5 +10,8 @@ public class CourseDetailsViewModel
     public bool CanGetCertificate { get; set; }
     public int? CertificateId { get; set; }
     public Test? FinalTest { get; set; }
+    public Dictionary<int, decimal> TestScores { get; set; } = new();
+    public Dictionary<int, int?> PracticalGrades { get; set; } = new();
+    public CourseRatingSummaryVm? RatingSummary { get; set; }
 }
 

@@ -171,5 +171,99 @@ public class ProgressService(ApplicationDbContext dbContext) : IProgressService
         await dbContext.SaveChangesAsync();
         return certificate.Id;
     }
+
+    public async Task<CourseRatingSummary> GetCourseRatingSummaryAsync(int courseId, string studentId)
+    {
+        var entries = await GetCourseRatingEntriesAsync(courseId);
+        var entry = entries.FirstOrDefault(e => e.StudentId == studentId);
+        return new CourseRatingSummary(entry?.Points ?? 0, entry?.Rank ?? 0, entries.Count);
+    }
+
+    public async Task<IReadOnlyList<CourseRatingEntry>> GetCourseRatingEntriesAsync(int courseId)
+    {
+        var studentIds = await dbContext.Enrollments
+            .Where(e => e.CourseId == courseId && e.Status == Models.EnrollmentStatus.Approved)
+            .Select(e => e.StudentId)
+            .Distinct()
+            .ToListAsync();
+
+        if (studentIds.Count == 0)
+        {
+            return Array.Empty<CourseRatingEntry>();
+        }
+
+        var testInfos = await dbContext.Tests
+            .Where(t => t.CourseId == courseId || (t.ModuleId != null && t.Module!.CourseId == courseId))
+            .Select(t => new { t.Id, QuestionCount = t.Questions.Count })
+            .ToListAsync();
+
+        var testQuestionCounts = testInfos.ToDictionary(t => t.Id, t => t.QuestionCount);
+        var testIds = testQuestionCounts.Keys.ToList();
+
+        var testResults = await dbContext.TestResults
+            .Where(r => testIds.Contains(r.TestId) && studentIds.Contains(r.StudentId))
+            .Select(r => new { r.StudentId, r.TestId, r.ScorePercent })
+            .ToListAsync();
+
+        var testPointsByStudent = new Dictionary<string, decimal>();
+        foreach (var result in testResults)
+        {
+            if (!testQuestionCounts.TryGetValue(result.TestId, out var questionCount))
+            {
+                continue;
+            }
+
+            var points = Math.Round(result.ScorePercent * questionCount / 100m, 0);
+            if (testPointsByStudent.ContainsKey(result.StudentId))
+            {
+                testPointsByStudent[result.StudentId] += points;
+            }
+            else
+            {
+                testPointsByStudent[result.StudentId] = points;
+            }
+        }
+
+        var taskIds = await dbContext.PracticalTasks
+            .Where(t => t.Module!.CourseId == courseId)
+            .Select(t => t.Id)
+            .ToListAsync();
+
+        var practicalPoints = await dbContext.PracticalSubmissions
+            .Where(s => taskIds.Contains(s.TaskId) && s.Grade != null && studentIds.Contains(s.StudentId))
+            .GroupBy(s => new { s.StudentId, s.TaskId })
+            .Select(g => new { g.Key.StudentId, Grade = g.Max(x => x.Grade) })
+            .ToListAsync();
+
+        var practicalPointsByStudent = practicalPoints
+            .GroupBy(p => p.StudentId)
+            .ToDictionary(g => g.Key, g => g.Sum(x => x.Grade ?? 0));
+
+        var students = await dbContext.Users
+            .Where(u => studentIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.FirstName, u.LastName, u.Email })
+            .ToListAsync();
+
+        var entries = students
+            .Select(s =>
+            {
+                var testPoints = testPointsByStudent.TryGetValue(s.Id, out var testTotal) ? testTotal : 0;
+                var practicalTotal = practicalPointsByStudent.TryGetValue(s.Id, out var practice) ? practice : 0;
+                var fullName = $"{s.FirstName} {s.LastName}".Trim();
+                var name = string.IsNullOrWhiteSpace(fullName) ? (s.Email ?? "Student") : fullName;
+                return new { s.Id, Name = name, Points = testPoints + practicalTotal };
+            })
+            .OrderByDescending(e => e.Points)
+            .ThenBy(e => e.Name)
+            .ToList();
+
+        var ranked = new List<CourseRatingEntry>();
+        for (var i = 0; i < entries.Count; i++)
+        {
+            ranked.Add(new CourseRatingEntry(entries[i].Id, entries[i].Name, entries[i].Points, i + 1));
+        }
+
+        return ranked;
+    }
 }
 

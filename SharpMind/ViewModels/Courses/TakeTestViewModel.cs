@@ -9,6 +9,10 @@ public class TakeTestViewModel
     public int CourseId { get; set; }
     public string TestTitle { get; set; } = string.Empty;
     public List<QuestionVm> Questions { get; set; } = [];
+    public decimal? ScorePercent { get; set; }
+    public int? Rank { get; set; }
+    public int? TotalStudents { get; set; }
+    public bool ShowResults { get; set; }
 
     public class QuestionVm
     {

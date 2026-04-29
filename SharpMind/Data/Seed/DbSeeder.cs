@@ -29,16 +29,16 @@ public static class DbSeeder
 
         var mentors = new List<ApplicationUser>
         {
-            await EnsureUserAsync(userManager, "mentor1@courses.com", "mentor1", "Mentor", "One", "Mentor123!", AppRoles.Mentor),
-            await EnsureUserAsync(userManager, "mentor2@courses.com", "mentor2", "Mentor", "Two", "Mentor123!", AppRoles.Mentor),
-            await EnsureUserAsync(userManager, "mentor3@courses.com", "mentor3", "Mentor", "Three", "Mentor123!", AppRoles.Mentor),
-            await EnsureUserAsync(userManager, "mentor4@courses.com", "mentor4", "Mentor", "Four", "Mentor123!", AppRoles.Mentor)
+            await EnsureUserAsync(userManager, "mentor1@gmail.com", "mentor1", "Mentor", "One", "Mentor123!", AppRoles.Mentor),
+            await EnsureUserAsync(userManager, "mentor2@gmail.com", "mentor2", "Mentor", "Two", "Mentor123!", AppRoles.Mentor),
+            await EnsureUserAsync(userManager, "mentor3@gmail.com", "mentor3", "Mentor", "Three", "Mentor123!", AppRoles.Mentor),
+            await EnsureUserAsync(userManager, "mentor4@gmail.com", "mentor4", "Mentor", "Four", "Mentor123!", AppRoles.Mentor)
         };
 
         _ = admin;
         var devOpsMentor = await EnsureUserAsync(
             userManager,
-            "devops_mentor@courses.com",
+            "devops_mentor@gmail.com",
             "devops_mentor",
             "DevOps",
             "Mentor",
@@ -47,7 +47,7 @@ public static class DbSeeder
 
         var javaMentor = await EnsureUserAsync(
             userManager,
-            "java_mentor@courses.com",
+            "java_mentor@gmail.com",
             "java_mentor",
             "Java",
             "Mentor",
@@ -56,9 +56,45 @@ public static class DbSeeder
 
         var frontendMentor = await EnsureUserAsync(
             userManager,
-            "frontend_mentor@courses.com",
+            "frontend_mentor@gmail.com",
             "frontend_mentor",
             "Frontend",
+            "Mentor",
+            "Mentor123!",
+            AppRoles.Mentor);
+
+        var cppMentor = await EnsureUserAsync(
+            userManager,
+            "cpp_mentor@gmail.com",
+            "cpp_mentor",
+            "Cpp",
+            "Mentor",
+            "Mentor123!",
+            AppRoles.Mentor);
+
+        var goMentor = await EnsureUserAsync(
+            userManager,
+            "go_mentor@gmail.com",
+            "go_mentor",
+            "Go",
+            "Mentor",
+            "Mentor123!",
+            AppRoles.Mentor);
+
+        var reactMentor = await EnsureUserAsync(
+            userManager,
+            "react_mentor@gmail.com",
+            "react_mentor",
+            "React",
+            "Mentor",
+            "Mentor123!",
+            AppRoles.Mentor);
+
+        var angularMentor = await EnsureUserAsync(
+            userManager,
+            "angular_mentor@gmail.com",
+            "angular_mentor",
+            "Angular",
             "Mentor",
             "Mentor123!",
             AppRoles.Mentor);
@@ -69,7 +105,8 @@ public static class DbSeeder
             ["DevOps з нуля", "DevOps z nulia", "DevOps from zero to pro"],
             "DevOps from zero to pro",
             "CI/CD, containers, cloud basics and monitoring from scratch.",
-            CourseTopic.DevOps);
+            CourseTopic.DevOps,
+            CourseLevel.Serednii);
         await RebuildSimpleCourseContentAsync(dbContext, devOps);
 
         var csharp = await EnsureCourseShellAsync(
@@ -78,7 +115,8 @@ public static class DbSeeder
             ["C# Advanced"],
             "C# Advanced",
             "Advanced patterns, async, performance and architecture in C#.",
-            CourseTopic.Programming);
+            CourseTopic.Programming,
+            CourseLevel.Prosunutyi);
         await RebuildCSharpAdvancedAsync(dbContext, csharp);
 
         var jsFullStack = await EnsureCourseShellAsync(
@@ -87,7 +125,8 @@ public static class DbSeeder
             ["JavaScript Full-Stack"],
             "JavaScript Full-Stack",
             "Modern JavaScript from backend services to interactive frontend.",
-            CourseTopic.WebDevelopment);
+            CourseTopic.WebDevelopment,
+            CourseLevel.Serednii);
         await RebuildJavaScriptFullStackAsync(dbContext, jsFullStack);
 
         var python = await EnsureCourseShellAsync(
@@ -96,7 +135,8 @@ public static class DbSeeder
             ["Python for Data Science"],
             "Python for Data Science",
             "Data wrangling, visualization and ML essentials with Python.",
-            CourseTopic.DataScience);
+            CourseTopic.DataScience,
+            CourseLevel.Serednii);
         await RebuildPythonForDataScienceAsync(dbContext, python);
 
         var java = await EnsureCourseShellAsync(
@@ -105,7 +145,8 @@ public static class DbSeeder
             ["Java Fundamentals"],
             "Java Fundamentals",
             "Базовий курс Java: синтаксис, типи даних, ООП, масиви, умови та цикли.",
-            CourseTopic.Programming);
+            CourseTopic.Programming,
+            CourseLevel.Pochatkovyi);
         await RebuildJavaFundamentalsAsync(dbContext, java);
 
         var frontend = await EnsureCourseShellAsync(
@@ -114,8 +155,49 @@ public static class DbSeeder
             ["Frontend Fundamentals"],
             "Frontend Fundamentals",
             "Базовий курс Frontend: HTML5, CSS3, Flexbox/Grid, JavaScript та DOM.",
-            CourseTopic.WebDevelopment);
+            CourseTopic.WebDevelopment,
+            CourseLevel.Pochatkovyi);
         await RebuildFrontendFundamentalsAsync(dbContext, frontend);
+
+        var cpp = await EnsureCourseShellAsync(
+            dbContext,
+            cppMentor.Id,
+            ["C++ Fundamentals"],
+            "C++ Fundamentals",
+            "Базовий курс з мови C++: синтаксис, типи даних, масиви, вказівники та функції.",
+            CourseTopic.Programming,
+            CourseLevel.Pochatkovyi);
+        await RebuildCppFundamentalsAsync(dbContext, cpp);
+
+        var go = await EnsureCourseShellAsync(
+            dbContext,
+            goMentor.Id,
+            ["Go Fundamentals"],
+            "Go Fundamentals",
+            "Основи Go: змінні, керування потоком, масиви, структури та конкурентність.",
+            CourseTopic.Programming,
+            CourseLevel.Pochatkovyi);
+        await RebuildGoFundamentalsAsync(dbContext, go);
+
+        var react = await EnsureCourseShellAsync(
+            dbContext,
+            reactMentor.Id,
+            ["React Fundamentals"],
+            "React Fundamentals",
+            "Початковий курс React: JSX, стани, ефекти, маршрутизація та контекст.",
+            CourseTopic.WebDevelopment,
+            CourseLevel.Pochatkovyi);
+        await RebuildReactFundamentalsAsync(dbContext, react);
+
+        var angular = await EnsureCourseShellAsync(
+            dbContext,
+            angularMentor.Id,
+            ["Angular Fundamentals"],
+            "Angular Fundamentals",
+            "Основи Angular: компоненти, директиви, сервіси, маршрутизація, форми.",
+            CourseTopic.WebDevelopment,
+            CourseLevel.Pochatkovyi);
+        await RebuildAngularFundamentalsAsync(dbContext, angular);
 
         await dbContext.SaveChangesAsync();
     }
@@ -126,7 +208,8 @@ public static class DbSeeder
         IEnumerable<string> aliases,
         string title,
         string description,
-        CourseTopic topic)
+        CourseTopic topic,
+        CourseLevel level)
     {
         var aliasSet = aliases.ToList();
         var course = await dbContext.Courses
@@ -150,8 +233,8 @@ public static class DbSeeder
                 Title = title,
                 Description = description,
                 Topic = topic,
-                Level = CourseLevel.Pochatkovyi,
-                Price = 0,
+                Level = level,
+                Price = GetPriceForLevel(level),
                 MentorId = mentorId,
                 IsPublished = true,
                 CreatedAt = DateTime.UtcNow
@@ -163,14 +246,22 @@ public static class DbSeeder
             course.Title = title;
             course.Description = description;
             course.Topic = topic;
-            course.Level = CourseLevel.Pochatkovyi;
-            course.Price = 0;
+            course.Level = level;
+            course.Price = GetPriceForLevel(level);
             course.MentorId = mentorId;
             course.IsPublished = true;
         }
 
         return course;
     }
+
+    private static decimal GetPriceForLevel(CourseLevel level) => level switch
+    {
+        CourseLevel.Pochatkovyi => 2000m,
+        CourseLevel.Serednii => 6000m,
+        CourseLevel.Prosunutyi => 10000m,
+        _ => 2000m
+    };
 
     private static async Task RebuildSimpleCourseContentAsync(ApplicationDbContext dbContext, Course course)
     {
@@ -417,6 +508,442 @@ public static class DbSeeder
             Q("Як отримати доступ до елемента за класом \"test\" у JS?", ("document.querySelector(\".test\")", true), ("document.getElementById(\"test\")", false), ("document.getElementsByTagName(\"test\")", false), ("$(\".test\")", false)),
             Q("Що таке DOM?", ("Об'єктна модель документа, яка представляє структуру HTML", true), ("Мова запитів", false), ("Графічний інтерфейс", false), ("Серверна мова", false)),
             Q("Як змінити текст елемента за допомогою innerHTML?", ("element.innerHTML = \"Новий текст\";", true), ("element.text = \"Новий текст\";", false), ("element.innerHTML(\"Новий текст\");", false), ("element.changeText(\"Новий текст\");", false))
+        ]));
+    }
+
+    private static async Task RebuildCppFundamentalsAsync(ApplicationDbContext dbContext, Course course)
+    {
+        await PurgeCourseContentAsync(dbContext, course.Id);
+
+        course.Modules.Add(BuildModule(
+            1,
+            "Вступ до C++ (історія, компілятори, Hello World)",
+            "Історія мови, компілятори та перша програма на C++.",
+            [
+                "Офіційний туторіал cppreference \"Getting started\"",
+                "Вступ до C++ (learncpp.com)",
+                "Компіляція та запуск першої програми"
+            ],
+            [
+                Q("Яке розширення мають файли з вихідним кодом C++?", (".c", false), (".cpp", true), (".cxx", false), (".cc", false)),
+                Q("Яка функція є точкою входу в програму C++?", ("start()", false), ("main()", true), ("run()", false), ("begin()", false)),
+                Q("Який оператор використовується для виведення тексту в консоль?", ("printf", false), ("cout <<", true), ("print", false), ("console.log", false)),
+                Q("Яка бібліотека потрібна для використання cout?", ("<stdio.h>", false), ("<iostream>", true), ("<cstdlib>", false), ("<conio.h>", false)),
+                Q("Як скомпілювати програму hello.cpp за допомогою g++?", ("g++ hello.cpp (правильна, створює a.out)", true), ("compile hello.cpp", false), ("build hello.cpp", false), ("run hello.cpp", false))
+            ],
+            "Напишіть програму на C++, яка виводить \"Hello, C++!\". Код надішліть текстом."));
+
+        course.Modules.Add(BuildModule(
+            2,
+            "Змінні, типи даних, оператори",
+            "Примітивні типи, оператори, змінні та константи в C++.",
+            [
+                "Типи даних у C++ (cppreference)",
+                "Оператори в C++",
+                "Змінні та константи"
+            ],
+            [
+                Q("Який тип даних використовується для цілих чисел (зазвичай 4 байти)?", ("char", false), ("int", true), ("float", false), ("double", false)),
+                Q("Що виведе cout << 7 / 2;?", ("3", true), ("3.5", false), ("3.0", false), ("Помилка", false)),
+                Q("Який оператор порівняння \"дорівнює\"?", ("=", false), ("==", true), ("!=", false), ("<=", false)),
+                Q("Як оголосити константу, яку не можна змінити?", ("const int x = 5;", true), ("int const x = 5; (теж вірно, але A простіше)", false), ("constant int x = 5;", false), ("final int x = 5;", false)),
+                Q("Який тип даних для чисел з рухомою комою подвійної точності?", ("float", false), ("double", true), ("long double", false), ("decimal", false))
+            ],
+            "Напишіть програму, яка оголошує змінні a=10, b=3 і обчислює суму, різницю, добуток, частку (цілочисельну) та остачу. Виведіть результати. Код надішліть текстом."));
+
+        course.Modules.Add(BuildModule(
+            3,
+            "Умовні оператори та цикли",
+            "Умовні оператори if/else/switch та цикли for/while/do-while.",
+            [
+                "if, else, switch (learncpp)",
+                "Цикли for, while, do-while",
+                "Оператори break і continue"
+            ],
+            [
+                Q("Що виведе код?\nint x = 5;\nif (x < 3) cout << \"A\";\nelse if (x > 3) cout << \"B\";\nelse cout << \"C\";", ("A", false), ("B", true), ("C", false), ("Нічого", false)),
+                Q("Який цикл виконує тіло хоча б один раз?", ("for", false), ("while", false), ("do-while", true), ("foreach", false)),
+                Q("Скільки ітерацій виконає цикл for (int i=0; i<5; i++)?", ("4", false), ("5", true), ("6", false), ("0", false)),
+                Q("Який оператор негайно завершує цикл?", ("continue", false), ("break", true), ("return", false), ("exit", false)),
+                Q("Що робить switch?", ("вибирає одну з багатьох гілок", true), ("цикл", false), ("оголошення змінної", false), ("функцію", false))
+            ],
+            "Напишіть програму, яка виводить всі числа від 1 до 50, які діляться на 3. Код надішліть текстом."));
+
+        course.Modules.Add(BuildModule(
+            4,
+            "Масиви та рядки",
+            "Масиви та робота з рядками у C++.",
+            [
+                "Масиви в C++",
+                "Рядки (string, c-string)",
+                "Базові операції з масивами"
+            ],
+            [
+                Q("Як оголосити масив з 10 цілих чисел?", ("int arr[10];", true), ("arr int[10];", false), ("int[10] arr;", false), ("array<int> arr(10);", false)),
+                Q("Який індекс має перший елемент масиву?", ("1", false), ("0", true), ("-1", false), ("перший", false)),
+                Q("Як отримати довжину масиву (кількість елементів)?", ("arr.size()", false), ("sizeof(arr)/sizeof(arr[0])", true), ("arr.length()", false), ("len(arr)", false)),
+                Q("Яка бібліотека для роботи з рядками std::string?", ("<cstring>", false), ("<string>", true), ("<strlib>", false), ("<strings>", false)),
+                Q("Як скопіювати рядок \"Hello\" у змінну str?", ("string str = \"Hello\";", true), ("str = \"Hello\";", false), ("string str(\"Hello\");", false), ("всі варіанти (A і C правильні, але для тесту виберемо A)", false))
+            ],
+            "Напишіть програму, яка створює масив з п'яти цілих чисел, введених користувачем, і виводить їх у зворотньому порядку. Код надішліть текстом."));
+
+        course.Modules.Add(BuildModule(
+            5,
+            "Вказівники та функції",
+            "Вказівники, функції та передача аргументів.",
+            [
+                "Вказівники (cppreference)",
+                "Функції в C++",
+                "Передача аргументів за значенням та за посиланням"
+            ],
+            [
+                Q("Що таке вказівник?", ("Змінна, що зберігає адресу пам'яті", true), ("Тип даних", false), ("Функція", false), ("Оператор", false)),
+                Q("Як отримати адресу змінної x?", ("*x", false), ("&x", true), ("x&", false), ("адреса(x)", false)),
+                Q("Що робить оператор *p (розіменування) ?", ("повертає значення за адресою", true), ("повертає адресу", false), ("змінює тип", false), ("видаляє змінну", false)),
+                Q("Як оголосити функцію, яка повертає ціле число і приймає два цілих?", ("int func(int a, int b) {}", true), ("void func(int a, int b) {}", false), ("func(int a, int b): int {}", false), ("int[] func(int a, int b) {}", false)),
+                Q("Що таке перевантаження функцій?", ("Функції з однаковим іменем, але різними параметрами", true), ("Дві функції з різними іменами", false), ("Функція всередині функції", false), ("Рекурсія", false))
+            ],
+            "Напишіть функцію int max(int a, int b), яка повертає більше з двох чисел. Викличте її в main для чисел 15 і 30, виведіть результат. Код надішліть текстом."));
+
+        course.Tests.Add(BuildFinalTest("Фінальний тест для C++",
+        [
+            Q("Який заголовний файл потрібен для cout?", ("<iostream>", true), ("<cstdio>", false), ("<conio>", false), ("<ostream>", false)),
+            Q("Що таке nullptr?", ("нульовий вказівник", true), ("константа", false), ("функція", false), ("тип даних", false)),
+            Q("Який оператор виділяє пам'ять динамічно?", ("new", true), ("malloc", false), ("alloc", false), ("create", false)),
+            Q("Як звільнити пам'ять, виділену за допомогою new?", ("delete", true), ("free", false), ("clear", false), ("remove", false)),
+            Q("Що таке посилання (reference)?", ("альтернативне ім'я змінної", true), ("вказівник", false), ("функція", false), ("макрос", false)),
+            Q("Який тип циклу використовується для перебору масиву (C++11)?", ("for (int x : arr)", true), ("foreach", false), ("each", false), ("for-each", false)),
+            Q("Що означає const після метода класу?", ("метод не змінює стан об'єкта", true), ("метод повертає константу", false), ("об'єкт незмінний", false), ("метод не можна викликати", false)),
+            Q("Як передати масив у функцію в C++?", ("через вказівник", true), ("за значенням", false), ("за посиланням", false), ("не можна", false)),
+            Q("Що таке std::vector?", ("динамічний масив", true), ("статичний масив", false), ("рядок", false), ("список", false)),
+            Q("Яка бібліотека для алгоритмів (сортування тощо)?", ("<algorithm>", true), ("<algo>", false), ("<sort>", false), ("<utility>", false))
+        ]));
+    }
+
+    private static async Task RebuildGoFundamentalsAsync(ApplicationDbContext dbContext, Course course)
+    {
+        await PurgeCourseContentAsync(dbContext, course.Id);
+
+        course.Modules.Add(BuildModule(
+            1,
+            "Вступ до Go (історія, установка, Hello World)",
+            "Встановлення Go, запуск першої програми та базові поняття.",
+            [
+                "Офіційний тур по Go",
+                "Встановлення Go",
+                "Перша програма на Go"
+            ],
+            [
+                Q("Яке розширення файлів Go?", (".g", false), (".go", true), (".golang", false), (".gol", false)),
+                Q("Яка функція є точкою входу?", ("main()", true), ("start()", false), ("run()", false), ("begin()", false)),
+                Q("Як вивести текст у консоль?", ("fmt.Println()", true), ("print()", false), ("println()", false), ("console.log()", false)),
+                Q("Який пакет потрібен для виведення?", ("\"fmt\"", true), ("\"print\"", false), ("\"io\"", false), ("\"os\"", false)),
+                Q("Як скомпілювати програму hello.go?", ("go build hello.go", true), ("go run hello.go", false), ("compile hello.go", false), ("gcc hello.go", false))
+            ],
+            "Напишіть програму на Go, яка виводить \"Вітаю у світі Go!\". Код надішліть текстом."));
+
+        course.Modules.Add(BuildModule(
+            2,
+            "Змінні, типи даних, основні конструкції",
+            "Змінні, базові типи, константи та ініціалізація.",
+            [
+                "Змінні в Go",
+                "Базові типи даних",
+                "Константи та ініціалізація"
+            ],
+            [
+                Q("Як оголосити змінну x типу int зі значенням 5?", ("var x int = 5", true), ("x := 5 (теж вірно, але краще A)", false), ("int x = 5", false), ("x = 5", false)),
+                Q("Що виведе код? x := 7 / 2; fmt.Println(x)", ("3", true), ("3.5", false), ("3.0", false), ("помилка", false)),
+                Q("Який тип даних для чисел з плаваючою комою (64 біти)?", ("float32", false), ("float64", true), ("float", false), ("double", false)),
+                Q("Як оголосити константу?", ("const pi = 3.14", true), ("var pi = 3.14", false), ("let pi = 3.14", false), ("final pi = 3.14", false)),
+                Q("Що таке :=?", ("коротке оголошення змінної", true), ("присвоєння", false), ("порівняння", false), ("декларування типу", false))
+            ],
+            "Напишіть програму, яка обчислює площу прямокутника зі сторонами 10 і 20. Виведіть результат. Код надішліть текстом."));
+
+        course.Modules.Add(BuildModule(
+            3,
+            "Управління потоком (if, for, switch)",
+            "Умовні оператори та цикл for в Go.",
+            [
+                "if та else в Go",
+                "Цикл for (єдиний цикл в Go)",
+                "Switch"
+            ],
+            [
+                Q("Як записати цикл for, що повторюється 10 разів?", ("for i := 0; i < 10; i++", true), ("for (i=0; i<10; i++)", false), ("for i in 0..9", false), ("range 10", false)),
+                Q("Чи є в Go цикл while?", ("Так, while", false), ("Ні, використовується for без умови", true), ("є repeat-until", false), ("є do-while", false)),
+                Q("Що виведе?\nx := 3\nif x > 5 { fmt.Print(\"A\") } else { fmt.Print(\"B\") }", ("A", false), ("B", true), ("C", false), ("помилка", false)),
+                Q("Як написати безкінечний цикл?", ("for true {}", false), ("for {}", false), ("for ; ; {}", false), ("всі варіанти", true)),
+                Q("Що робить break в циклі?", ("завершує цикл", true), ("переходить до наступної ітерації", false), ("завершує програму", false), ("нічого", false))
+            ],
+            "Напишіть програму, яка виводить всі парні числа від 1 до 20. Код надішліть текстом."));
+
+        course.Modules.Add(BuildModule(
+            4,
+            "Масиви, зрізи (slices), мапи",
+            "Масиви, slices та maps у Go.",
+            [
+                "Масиви в Go",
+                "Зрізи (slices)",
+                "Мапи (maps)"
+            ],
+            [
+                Q("Як створити масив з трьох цілих чисел [1,2,3]?", ("arr := [3]int{1,2,3}", true), ("arr := []int{1,2,3}", false), ("arr := [1,2,3]", false), ("var arr [3]int = {1,2,3}", false)),
+                Q("Що таке зріз (slice)?", ("динамічний масив", true), ("статичний масив", false), ("вказівник", false), ("структура", false)),
+                Q("Як додати елемент до зрізу slice?", ("slice.append(5)", false), ("append(slice, 5)", true), ("slice = slice + 5", false), ("slice.push(5)", false)),
+                Q("Як створити мапу (map) з рядковими ключами та цілими значеннями?", ("m := make(map[string]int)", true), ("m := map[string]int{}", false), ("обидва варіанти правильні (D)", false), ("тільки A, але давайте виберемо A як основну", false)),
+                Q("Як отримати довжину зрізу?", ("len(slice)", true), ("slice.length()", false), ("slice.len", false), ("size(slice)", false))
+            ],
+            "Напишіть програму, яка створює зріз цілих чисел [10,20,30] і додає до нього число 40. Виведіть отриманий зріз. Код надішліть текстом."));
+
+        course.Modules.Add(BuildModule(
+            5,
+            "Функції, структури, методи",
+            "Функції, структури та методи у Go.",
+            [
+                "Функції в Go",
+                "Структури (struct)",
+                "Методи на структурах"
+            ],
+            [
+                Q("Як оголосити функцію, що повертає int, з параметром int?", ("func myFunc(x int) int { return x*2 }", true), ("function myFunc(x int) int { return x*2 }", false), ("def myFunc(x int): return x*2", false), ("int myFunc(int x) { return x*2 }", false)),
+                Q("Що таке структура (struct)?", ("набір полів", true), ("масив", false), ("інтерфейс", false), ("функція", false)),
+                Q("Як визначити метод для структури Person?", ("func (p Person) SayHello()", true), ("func Person.SayHello()", false), ("method SayHello(p Person)", false), ("Person::SayHello", false)),
+                Q("Що таке вказівник на структуру?", ("*Person", true), ("&Person", false), ("Person*", false), ("ref Person", false)),
+                Q("Яке ключове слово для інтерфейсу?", ("interface", true), ("implements", false), ("class", false), ("struct", false))
+            ],
+            "Створіть структуру Rectangle з полями width, height типу float64. Додайте метод area(), що обчислює площу. У main створіть об'єкт і виведіть площу. Код надішліть текстом."));
+
+        course.Tests.Add(BuildFinalTest("Фінальний тест для Go",
+        [
+            Q("Що таке go routine?", ("легковаговий потік", true), ("функція", false), ("тип даних", false), ("пакет", false)),
+            Q("Як запустити go routine?", ("go myFunc()", true), ("routine myFunc()", false), ("go run myFunc()", false), ("start myFunc()", false)),
+            Q("Що таке defer?", ("відкладає виконання функції до повернення", true), ("відкладає оголошення", false), ("створює відкладений потік", false), ("видаляє змінну", false)),
+            Q("Як обробити помилку в Go (типовий патерн)?", ("перевірка значення помилки", true), ("try-catch", false), ("throw", false), ("exception", false)),
+            Q("Що таке nil в Go?", ("нульове значення для вказівників, інтерфейсів", true), ("помилка", false), ("порожній масив", false), ("константа", false)),
+            Q("Як створити новий канал (channel)?", ("ch := make(chan int)", true), ("ch := new(chan int)", false), ("ch := chan int{}", false), ("ch := channel(int)", false)),
+            Q("Що робить оператор <-?", ("надсилання/отримання в канал", true), ("присвоєння", false), ("порівняння", false), ("розіменування", false)),
+            Q("Як об'єднати два рядки?", ("str1 + str2", true), ("str1.concat(str2)", false), ("str1.append(str2)", false), ("join(str1, str2)", false)),
+            Q("Що таке package main?", ("виконуваний пакет", true), ("бібліотека", false), ("тестовий пакет", false), ("пакет для main функції", false)),
+            Q("Яка команда для форматування коду?", ("go fmt", true), ("go format", false), ("go lint", false), ("go tidy", false))
+        ]));
+    }
+
+    private static async Task RebuildReactFundamentalsAsync(ApplicationDbContext dbContext, Course course)
+    {
+        await PurgeCourseContentAsync(dbContext, course.Id);
+
+        course.Modules.Add(BuildModule(
+            1,
+            "Вступ до React (JSX, компоненти, props)",
+            "Основи React, JSX та передача props.",
+            [
+                "React офіційна документація – Головна концепція",
+                "JSX в деталях (React)",
+                "Компоненти та пропси"
+            ],
+            [
+                Q("Що таке React?", ("бібліотека для побудови інтерфейсів", true), ("фреймворк", false), ("мова програмування", false), ("база даних", false)),
+                Q("Який синтаксис дозволяє писати HTML в JavaScript?", ("JSX", true), ("HTML-in-JS", false), ("XML", false), ("TypeScript", false)),
+                Q("Як створити функціональний компонент?", ("function MyComponent() { return <div>Hi</div> }", true), ("class MyComponent extends React.Component {}", false), ("component MyComponent() {}", false), ("createComponent(MyComponent)", false)),
+                Q("Як передати пропс name зі значенням \"John\"?", ("<Component name=\"John\" />", true), ("<Component name={John} />", false), ("<Component name=John />", false), ("<Component {name:\"John\"} />", false)),
+                Q("Що таке props?", ("властивості компонента, тільки для читання", true), ("стан компонента", false), ("методи компонента", false), ("події", false))
+            ],
+            "Створіть функціональний компонент Greeting, що приймає проп name і виводить <h1>Привіт, {name}!</h1>. Викличте його з name=\"Анна\". Код надішліть текстом (JSX)."));
+
+        course.Modules.Add(BuildModule(
+            2,
+            "Стан (useState) та обробка подій",
+            "Стан компонентів та обробка подій у React.",
+            [
+                "Стан компонента: useState",
+                "Обробка подій у React",
+                "Стан та життєвий цикл"
+            ],
+            [
+                Q("Який хук використовується для створення стану?", ("useState", true), ("useEffect", false), ("useRef", false), ("useContext", false)),
+                Q("Як оновити стан count?", ("setCount(newValue)", true), ("count = newValue", false), ("this.state.count = newValue", false), ("updateCount(newValue)", false)),
+                Q("Яка подія використовується для обробки кліку?", ("onClick", true), ("onPress", false), ("onMouseClick", false), ("click", false)),
+                Q("Що буде, якщо викликати useState поза функціональним компонентом?", ("помилка", true), ("нічого", false), ("створиться глобальний стан", false), ("попередження", false)),
+                Q("Як зберігати значення між рендерами без оновлення компонента?", ("useRef", true), ("useMemo", false), ("useCallback", false), ("useState", false))
+            ],
+            "Створіть компонент Counter з кнопкою, при натисканні якої лічильник збільшується на 1. Відобразіть поточне значення. Код надішліть текстом."));
+
+        course.Modules.Add(BuildModule(
+            3,
+            "useEffect та побічні ефекти",
+            "Побічні ефекти у React та useEffect.",
+            [
+                "useEffect (React документація)",
+                "Завантаження даних у useEffect",
+                "Чистка ефектів"
+            ],
+            [
+                Q("Для чого використовується useEffect?", ("виконання побічних ефектів", true), ("створення стану", false), ("рендеринг", false), ("передача пропсів", false)),
+                Q("Як зробити useEffect, який запускається один раз при монтуванні?", ("useEffect(() => {}, [])", true), ("useEffect(() => {}, [state])", false), ("useEffect(() => {}, null)", false), ("useEffect(() => {}, true)", false)),
+                Q("Як запускати ефект при зміні певної змінної?", ("вказати залежності в масиві", true), ("викликати ефект вручну", false), ("не можна", false), ("використовувати useLayoutEffect", false)),
+                Q("Що таке cleanup функція в useEffect?", ("функція, яка виконується при розмонтуванні", true), ("функція, яка очищає стан", false), ("функція, яка запускається до ефекту", false), ("функція, яка оновлює DOM", false)),
+                Q("Який хук використовується для синхронізації з зовнішніми даними?", ("useEffect", true), ("useSync", false), ("useExternal", false), ("useData", false))
+            ],
+            "Створіть компонент, який при монтуванні завантажує дані з публічного API (наприклад, jsonplaceholder.typicode.com/posts/1) і відображає заголовок поста. Використайте fetch. Код надішліть текстом."));
+
+        course.Modules.Add(BuildModule(
+            4,
+            "Робота зі списками та ключі, форми",
+            "Рендеринг списків, ключі та форми у React.",
+            [
+                "Рендеринг списків",
+                "Ключі в React",
+                "Форми та контрольовані компоненти"
+            ],
+            [
+                Q("Як відрендерити масив елементів в JSX?", ("map", true), ("forEach", false), ("filter", false), ("reduce", false)),
+                Q("Для чого потрібен атрибут key в списках?", ("ідентифікація елементів для оптимізації", true), ("унікальний ключ для порядку", false), ("стилізація", false), ("доступ до елемента", false)),
+                Q("Що таке контрольований компонент форми?", ("стан компонента керує значенням поля", true), ("поле керує станом", false), ("DOM елемент керує значенням", false), ("форма не має стану", false)),
+                Q("Як отримати значення з інпуту в контрольованому компоненті?", ("через стан (state)", true), ("через ref", false), ("через event.target.value безпосередньо", false), ("через document.getElementById", false)),
+                Q("Що робить e.preventDefault() в обробнику форми?", ("запобігає перезавантаженню сторінки", true), ("запобігає відправці форми", false), ("запобігає запуску події", false), ("очищає форму", false))
+            ],
+            "Створіть компонент TodoList, який має поле вводу та кнопку \"Додати\". При кліку додає новий елемент до списку (використовуйте useState для масиву). Відобразіть список. Код надішліть текстом."));
+
+        course.Modules.Add(BuildModule(
+            5,
+            "Маршрутизація (React Router) та контекст",
+            "Маршрутизація та контекст у React.",
+            [
+                "React Router v6 основи",
+                "Контекст в React (useContext)",
+                "Навігація між сторінками"
+            ],
+            [
+                Q("Який компонент використовується для визначення маршрутів?", ("Routes, Route", true), ("Router", false), ("Switch", false), ("Path", false)),
+                Q("Як створити посилання для переходу без перезавантаження?", ("<Link to=\"/about\">", true), ("<a href=\"/about\">", false), ("<Nav to=\"/about\">", false), ("<Href to=\"/about\">", false)),
+                Q("Що таке Context?", ("спосіб передачі даних через дерево компонентів без пропсів", true), ("глобальний стан", false), ("бібліотека маршрутизації", false), ("хук стану", false)),
+                Q("Який хук використовується для доступу до контексту?", ("useContext", true), ("useConsumer", false), ("useProvider", false), ("useStore", false)),
+                Q("Який хук дозволяє отримати параметри URL?", ("useParams", true), ("useRouteParams", false), ("useLocation", false), ("useQuery", false))
+            ],
+            "Створіть два компоненти: Home і About. Налаштуйте маршрутизацію (React Router) для них. Додайте навігацію за допомогою Link. Код надішліть текстом."));
+
+        course.Tests.Add(BuildFinalTest("Фінальний тест для React",
+        [
+            Q("Що таке JSX?", ("синтаксичне розширення JavaScript, що дозволяє писати HTML", true), ("мова програмування", false), ("бібліотека", false), ("фреймворк", false)),
+            Q("Як передати функцію обробки кліку в компонент?", ("onClick={handleClick}", true), ("onClick=\"handleClick\"", false), ("onclick={handleClick}", false), ("onClick={handleClick()}", false)),
+            Q("Що таке Virtual DOM?", ("легковагове представлення реального DOM", true), ("база даних", false), ("ще одна бібліотека", false), ("браузерний API", false)),
+            Q("Як іменуються файли компонентів зазвичай?", ("PascalCase", true), ("camelCase", false), ("kebab-case", false), ("snake_case", false)),
+            Q("Що робить useMemo?", ("мемоізує значення", true), ("мемоізує функцію", false), ("створює реф", false), ("оновлює стан", false)),
+            Q("Що робить React.memo?", ("мемоізує компонент, запобігає зайвому рендеру", true), ("мемоізує пропси", false), ("прискорює рендер", false), ("робить компонент чистим", false)),
+            Q("Як прийнято робити запити до API в React (без бібліотек)?", ("useEffect + fetch", true), ("useState + fetch", false), ("useRef + fetch", false), ("компонент-контейнер", false)),
+            Q("Що таке \"підйом стану\" (lifting state up)?", ("переміщення стану до найближчого спільного предка", true), ("створення глобального стану", false), ("видалення стану", false), ("використання контексту", false)),
+            Q("Яке розширення мають файли TypeScript для React?", (".tsx", true), (".ts", false), (".jsx", false), (".react", false)),
+            Q("Який хук дозволяє отримати доступ до DOM-елемента?", ("useRef", true), ("useDOM", false), ("useElement", false), ("useCallback", false))
+        ]));
+    }
+
+    private static async Task RebuildAngularFundamentalsAsync(ApplicationDbContext dbContext, Course course)
+    {
+        await PurgeCourseContentAsync(dbContext, course.Id);
+
+        course.Modules.Add(BuildModule(
+            1,
+            "Вступ до Angular (компоненти, модулі, CLI)",
+            "Основи Angular, компоненти та CLI.",
+            [
+                "Офіційна документація Angular – Вступ",
+                "Angular CLI – встановлення та створення проєкту",
+                "Компоненти та шаблони"
+            ],
+            [
+                Q("Яка команда створює новий проєкт Angular?", ("ng new project-name", true), ("angular create project-name", false), ("create-react-app project-name", false), ("ng init", false)),
+                Q("Що таке компонент в Angular?", ("клас з контролером та шаблоном", true), ("функція", false), ("сервіс", false), ("маршрут", false)),
+                Q("Який декоратор позначає клас як компонент?", ("@Component", true), ("@NgModule", false), ("@Injectable", false), ("@Directive", false)),
+                Q("Який файл є кореневим модулем?", ("app.module.ts", true), ("main.ts", false), ("index.html", false), ("app.component.ts", false)),
+                Q("Як запустити проєкт Angular для розробки?", ("ng serve", true), ("ng build", false), ("ng start", false), ("angular serve", false))
+            ],
+            "Створіть компонент HelloComponent з шаблоном, який виводить \"Hello Angular\". (Синтаксис TypeScript, не потрібен повний проєкт – достатньо коду компонента). Код надішліть текстом."));
+
+        course.Modules.Add(BuildModule(
+            2,
+            "Прив'язка даних та директиви",
+            "Інтерполяція, директиви та двостороння прив'язка.",
+            [
+                "Прив'язка даних (інтерполяція, property, event)",
+                "Вбудовані директиви: ngIf, ngFor, ngSwitch",
+                "Двостороння прив'язка (ngModel)"
+            ],
+            [
+                Q("Який синтаксис інтерполяції в Angular?", ("{{ }})", true), ("{ }", false), ("[ ]", false), ("( )", false)),
+                Q("Яка директива використовується для умовного рендерингу?", ("*ngIf", true), ("*ngFor", false), ("*ngSwitch", false), ("*ngShow", false)),
+                Q("Як зв'язати властивість src зі змінною imageUrl?", ("[src]=\"imageUrl\"", true), ("src=\"{{imageUrl}}\"", false), ("bind-src=\"imageUrl\"", false), ("src={imageUrl}", false)),
+                Q("Як обробити подію кліку?", ("(click)=\"onClick()\"", true), ("on-click=\"onClick()\"", false), ("[click]=\"onClick()\"", false), ("click=\"onClick()\"", false)),
+                Q("Що таке двостороння прив'язка?", ("[(ngModel)]", true), ("[ngModel]", false), ("(ngModel)", false), ("[()]", false))
+            ],
+            "Створіть компонент, який має масив імен [\"Іван\",\"Марія\",\"Олег\"] та відображає їх у список <ul> за допомогою *ngFor. Код компонента та шаблону надішліть текстом."));
+
+        course.Modules.Add(BuildModule(
+            3,
+            "Сервіси та Dependency Injection",
+            "Сервіси, DI та HttpClient в Angular.",
+            [
+                "Сервіси в Angular",
+                "Dependency Injection (DI)",
+                "HttpClient для запитів"
+            ],
+            [
+                Q("Який декоратор робить клас сервісом?", ("@Injectable", true), ("@Service", false), ("@Component", false), ("@NgModule", false)),
+                Q("Де потрібно зареєструвати сервіс, щоб він був доступний у всьому додатку?", ("у providedIn: 'root'", true), ("в масиві providers компонента", false), ("в масиві imports", false), ("в масиві exports", false)),
+                Q("Як використовувати HTTP-клієнт в Angular?", ("import HttpClientModule, inject HttpClient", true), ("використовувати fetch", false), ("axios", false), ("jQuery.ajax", false)),
+                Q("Що таке Dependency Injection?", ("механізм передачі залежностей", true), ("створення об'єктів вручну", false), ("бібліотека", false), ("патерн проектування", false)),
+                Q("Як отримати доступ до сервісу в компоненті?", ("constructor(private myService: MyService) {}", true), ("myService = new MyService()", false), ("inject(MyService)", false), ("ServiceLocator.get(MyService)", false))
+            ],
+            "Створіть сервіс DataService, який має метод getUsers(), що повертає об'єкт Promise (або Observable) з масивом користувачів (захардкодьте). Впорскуйте цей сервіс в компонент і виведіть список. Код надішліть текстом."));
+
+        course.Modules.Add(BuildModule(
+            4,
+            "Маршрутизація (Router)",
+            "Налаштування маршрутів та навігації в Angular.",
+            [
+                "Angular Router – основи",
+                "RouterLink, RouterOutlet",
+                "Гварди (Guard) для захисту маршрутів"
+            ],
+            [
+                Q("Який компонент вказує, де відображати маршрути?", ("<router-outlet>", true), ("<route-outlet>", false), ("<router-view>", false), ("<outlet>", false)),
+                Q("Як створити посилання для переходу на маршрут /about?", ("<a routerLink=\"/about\">", true), ("<a href=\"/about\">", false), ("<link to=\"/about\">", false), ("<router-link to=\"/about\">", false)),
+                Q("Де визначаються маршрути в Angular?", ("в масиві routes (AppRoutingModule)", true), ("в main.ts", false), ("в компоненті", false), ("в сервісі", false)),
+                Q("Як отримати параметр з URL (наприклад, id: /user/5)?", ("ActivatedRoute params", true), ("Router.params", false), ("Route.snapshot", false), ("Location.params", false)),
+                Q("Що таке гвард (Guard)?", ("захист маршруту (перевірка доступу)", true), ("стиль", false), ("директивa", false), ("пайп", false))
+            ],
+            "Налаштуйте два маршрути: home та contact. Створіть відповідні компоненти. Додайте навігацію за допомогою routerLink. Код маршрутів та шаблону навігації надішліть текстом."));
+
+        course.Modules.Add(BuildModule(
+            5,
+            "Форми та валідація (Reactive Forms)",
+            "Reactive Forms, валідація та шаблони помилок.",
+            [
+                "Reactive Forms в Angular",
+                "Вбудовані валідатори",
+                "Створення власних валідаторів"
+            ],
+            [
+                Q("Який модуль потрібно імпортувати для реактивних форм?", ("ReactiveFormsModule", true), ("FormsModule", false), ("FormModule", false), ("NgForm", false)),
+                Q("Як створити FormGroup в компоненті?", ("this.form = new FormGroup({})", true), ("this.form = new Form()", false), ("@ViewChild('form')", false), ("createForm()", false)),
+                Q("Як прив'язати FormGroup до HTML-форми?", ("[formGroup]=\"form\"", true), ("formGroup=\"form\"", false), ("[(formGroup)]=\"form\"", false), ("bind-formGroup=\"form\"", false)),
+                Q("Який валідатор використовується для обов'язкового поля?", ("Validators.required", true), ("Validators.require", false), ("Validators.mandatory", false), ("Validators.notEmpty", false)),
+                Q("Як отримати доступ до помилок валідації в шаблоні?", ("form.get('field').hasError('required')", true), ("form.errors.required", false), ("field.errors", false), ("form.invalid", false))
+            ],
+            "Створіть реактивну форму з полями \"Ім'я\" (обов'язкове) та \"Email\" (обов'язкове, формат email). Додайте відображення помилок під полями. Код компонента та шаблону надішліть текстом."));
+
+        course.Tests.Add(BuildFinalTest("Фінальний тест для Angular",
+        [
+            Q("Яка основна мова програмування в Angular?", ("TypeScript", true), ("JavaScript", false), ("Dart", false), ("Python", false)),
+            Q("Що таке модуль (NgModule)?", ("контейнер для компонентів, директив, сервісів", true), ("компонент", false), ("сервіс", false), ("функція", false)),
+            Q("Що таке декоратор?", ("спеціальний синтаксис, який додає метадані", true), ("функція", false), ("клас", false), ("інтерфейс", false)),
+            Q("Який хук життєвого циклу викликається першим?", ("ngOnInit", true), ("ngOnChanges", false), ("ngAfterViewInit", false), ("constructor", false)),
+            Q("Як передати дані від батьківського компонента до дочірнього?", ("@Input()", true), ("@Output()", false), ("@ViewChild", false), ("сервіс", false)),
+            Q("Як випромінити подію з дочірнього компонента до батьківського?", ("@Output() + EventEmitter", true), ("@Input()", false), ("@ViewChild", false), ("сервіс", false)),
+            Q("Що таке пайп (pipe)?", ("перетворення даних у шаблоні", true), ("сервіс", false), ("компонент", false), ("директивa", false)),
+            Q("Який пайп використовується для форматування дати?", ("date", true), ("datetime", false), ("formatDate", false), ("datepipe", false)),
+            Q("Що таке Angular CLI?", ("інтерфейс командного рядка для створення та управління проєктом", true), ("бібліотека", false), ("мова", false), ("фреймворк", false)),
+            Q("Яка команда створює компонент MyComponent в Angular?", ("ng generate component MyComponent", true), ("ng new MyComponent", false), ("create component MyComponent", false), ("ng make component MyComponent", false))
         ]));
     }
 
@@ -714,7 +1241,8 @@ public static class DbSeeder
         string password,
         string role)
     {
-        var user = await userManager.FindByEmailAsync(email);
+        var user = await userManager.FindByEmailAsync(email)
+                   ?? await userManager.FindByNameAsync(username);
         if (user is null)
         {
             user = new ApplicationUser
@@ -731,6 +1259,39 @@ public static class DbSeeder
             {
                 var errors = string.Join("; ", createResult.Errors.Select(e => e.Description));
                 throw new InvalidOperationException($"Unable to seed user {email}: {errors}");
+            }
+        }
+        else
+        {
+            if (user.Email != email)
+            {
+                var emailResult = await userManager.SetEmailAsync(user, email);
+                if (!emailResult.Succeeded)
+                {
+                    var errors = string.Join("; ", emailResult.Errors.Select(e => e.Description));
+                    throw new InvalidOperationException($"Unable to update email for {email}: {errors}");
+                }
+            }
+
+            if (user.UserName != username)
+            {
+                var nameResult = await userManager.SetUserNameAsync(user, username);
+                if (!nameResult.Succeeded)
+                {
+                    var errors = string.Join("; ", nameResult.Errors.Select(e => e.Description));
+                    throw new InvalidOperationException($"Unable to update username for {email}: {errors}");
+                }
+            }
+
+            user.FirstName = firstName;
+            user.LastName = lastName;
+            user.EmailConfirmed = true;
+
+            var updateResult = await userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                var errors = string.Join("; ", updateResult.Errors.Select(e => e.Description));
+                throw new InvalidOperationException($"Unable to update user {email}: {errors}");
             }
         }
 

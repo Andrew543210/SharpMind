@@ -46,6 +46,10 @@ public class CoursesController(
         var canGetCertificate = false;
         int? certificateId = null;
 
+        Dictionary<int, decimal> testScoresMap = new();
+        Dictionary<int, int?> practicalGradesMap = new();
+        CourseRatingSummary? ratingSummary = null;
+
         if (!string.IsNullOrEmpty(userId))
         {
             enrollmentStatus = await dbContext.Enrollments
@@ -56,16 +60,22 @@ public class CoursesController(
             if (enrollmentStatus == EnrollmentStatus.Approved)
             {
                 progressPercent = await progressService.GetCourseProgressPercentAsync(id, userId);
-<<<<<<< Updated upstream
                 canGetCertificate = await progressService.CanIssueCertificateAsync(id, userId);
                 certificateId = await progressService.GetCertificateIdAsync(id, userId);
+                ratingSummary = await progressService.GetCourseRatingSummaryAsync(id, userId);
+                var testScores = await dbContext.TestResults
+                    .Where(r => r.StudentId == userId && (r.Test!.CourseId == id || (r.Test.ModuleId != null && r.Test.Module!.CourseId == id)))
+                    .Select(r => new { r.TestId, r.ScorePercent })
+                    .ToListAsync();
+                var practicalGrades = await dbContext.PracticalSubmissions
+                    .Where(s => s.StudentId == userId && s.Task!.Module!.CourseId == id && s.Grade != null)
+                    .GroupBy(s => s.TaskId)
+                    .Select(g => new { TaskId = g.Key, Grade = g.Max(x => x.Grade) })
+                    .ToListAsync();
+                testScoresMap = testScores.ToDictionary(t => t.TestId, t => t.ScorePercent);
+                practicalGradesMap = practicalGrades.ToDictionary(g => g.TaskId, g => g.Grade);
             }
         }
-=======
-                isCompleted = await progressService.IsCourseCompletedAsync(id, userId);
-
-            .FirstOrDefaultAsync(t => t.CourseId == id && t.IsFinalTest);
->>>>>>> Stashed changes
 
         var finalTest = course.Tests.FirstOrDefault(t => t.IsFinal);
 
@@ -74,15 +84,50 @@ public class CoursesController(
             Course = course,
             EnrollmentStatus = enrollmentStatus,
             ProgressPercent = progressPercent,
-<<<<<<< Updated upstream
             CanGetCertificate = canGetCertificate,
             CertificateId = certificateId,
-            FinalTest = finalTest
-=======
             FinalTest = finalTest,
-            CertificateId = certificateId
->>>>>>> Stashed changes
+            TestScores = testScoresMap,
+            PracticalGrades = practicalGradesMap,
+            RatingSummary = ratingSummary is null
+                ? null
+                : new CourseRatingSummaryVm { Points = ratingSummary.Points, Rank = ratingSummary.Rank, TotalStudents = ratingSummary.TotalStudents }
         });
+    }
+
+    [Authorize(Roles = "Student")]
+    [HttpGet]
+    public async Task<IActionResult> Rating(int courseId)
+    {
+        if (!await IsApprovedStudentAsync(courseId))
+        {
+            return Forbid();
+        }
+
+        var course = await dbContext.Courses
+            .Where(c => c.Id == courseId)
+            .Select(c => new { c.Id, c.Title })
+            .FirstOrDefaultAsync();
+
+        if (course is null)
+        {
+            return NotFound();
+        }
+
+        var entries = await progressService.GetCourseRatingEntriesAsync(courseId);
+        var model = new CourseRatingViewModel
+        {
+            CourseId = course.Id,
+            CourseTitle = course.Title,
+            Entries = entries.Select(e => new CourseRatingEntryVm
+            {
+                Rank = e.Rank,
+                StudentName = e.StudentName,
+                Points = e.Points
+            }).ToList()
+        };
+
+        return View(model);
     }
 
     [Authorize(Roles = "Student")]
@@ -91,7 +136,13 @@ public class CoursesController(
     public async Task<IActionResult> RequestEnrollment(int courseId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            ProgressPercent = progressPercent
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Forbid();
+        }
+
+        var existing = await dbContext.Enrollments
+            .FirstOrDefaultAsync(e => e.CourseId == courseId && e.StudentId == userId);
 
         if (existing is null)
         {
@@ -249,9 +300,14 @@ public class CoursesController(
         }
 
         await dbContext.SaveChangesAsync();
-        TempData["Success"] = $"Test completed. Your score: {score}%";
+        var rating = await progressService.GetCourseRatingSummaryAsync(model.CourseId, userId);
+        model.TestTitle = test.Title;
+        model.ScorePercent = score;
+        model.Rank = rating.Rank;
+        model.TotalStudents = rating.TotalStudents;
+        model.ShowResults = true;
 
-        return RedirectToAction(nameof(Details), new { id = model.CourseId });
+        return View(model);
     }
 
     [Authorize(Roles = "Student")]

@@ -36,9 +36,37 @@
     </div>
 </div>
 
+@if (Model.ShowResults)
+{
+    <div class="modal fade" id="testResultModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Результат тесту</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">Ваш результат: <strong>@Model.ScorePercent%</strong></p>
+                    <p class="mb-0">Місце в рейтингу курсу: <strong>@Model.Rank</strong> з @Model.TotalStudents</p>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-outline-mint" asp-action="Details" asp-route-id="@Model.CourseId">Повернутися до курсу</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @section Scripts
 {
     <partial name="_ValidationScriptsPartial" />
+    @if (Model.ShowResults)
+    {
+        <script>
+            const resultModal = new bootstrap.Modal(document.getElementById("testResultModal"));
+            resultModal.show();
+        </script>
+    }
 }
 
 

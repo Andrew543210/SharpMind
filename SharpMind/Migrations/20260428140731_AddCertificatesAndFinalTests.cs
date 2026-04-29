@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SharpMind.Migrations
 {
     /// <inheritdoc />
-    public partial class AddCertificatesAndFinalTests : Migration
+    public partial class AddCertificatesAndFinalTests_20260428140731 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

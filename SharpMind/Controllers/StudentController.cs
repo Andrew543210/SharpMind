@@ -25,13 +25,17 @@ public class StudentController(ApplicationDbContext dbContext, IProgressService 
         foreach (var enrollment in enrollments)
         {
             var progress = await progressService.GetCourseProgressPercentAsync(enrollment.CourseId, userId);
+            var rating = await progressService.GetCourseRatingSummaryAsync(enrollment.CourseId, userId);
             model.Add(new StudentDashboardCourseVm
             {
                 CourseId = enrollment.CourseId,
                 Title = enrollment.Course!.Title,
                 MentorName = $"{enrollment.Course.Mentor?.FirstName} {enrollment.Course.Mentor?.LastName}".Trim(),
                 ProgressPercent = progress,
-                CertificateId = await progressService.GetCertificateIdAsync(enrollment.CourseId, userId)
+                CertificateId = await progressService.GetCertificateIdAsync(enrollment.CourseId, userId),
+                RatingPoints = rating.Points,
+                RatingRank = rating.Rank,
+                RatingTotal = rating.TotalStudents
             });
         }
 

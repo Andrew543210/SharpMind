@@ -12,7 +12,7 @@ namespace SharpMind.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20260428140731_AddCertificatesAndFinalTests")]
-    partial class AddCertificatesAndFinalTests
+    partial class AddCertificatesAndFinalTests_20260428140731
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

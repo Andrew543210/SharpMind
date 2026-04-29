@@ -32,11 +32,25 @@ public class CourseCatalogService(ApplicationDbContext dbContext) : ICourseCatal
             query = query.Where(c => c.Level == filter.Level.Value);
         }
 
+        if (filter.PriceFrom.HasValue)
+        {
+            query = query.Where(c => c.Price >= filter.PriceFrom.Value);
+        }
+
+        if (filter.PriceTo.HasValue)
+        {
+            query = query.Where(c => c.Price <= filter.PriceTo.Value);
+        }
+
         query = filter.SortBy switch
         {
+            CourseSortType.Name when filter.SortDescending => query.OrderByDescending(c => c.Title),
             CourseSortType.Name => query.OrderBy(c => c.Title),
+            CourseSortType.Price when filter.SortDescending => query.OrderByDescending(c => c.Price).ThenBy(c => c.Title),
             CourseSortType.Price => query.OrderBy(c => c.Price).ThenBy(c => c.Title),
-            CourseSortType.Popularity => query.OrderByDescending(c => c.Enrollments.Count(e => e.Status == EnrollmentStatus.Approved))
+            CourseSortType.Popularity when filter.SortDescending => query.OrderByDescending(c => c.Enrollments.Count(e => e.Status == EnrollmentStatus.Approved))
+                .ThenBy(c => c.Title),
+            CourseSortType.Popularity => query.OrderBy(c => c.Enrollments.Count(e => e.Status == EnrollmentStatus.Approved))
                 .ThenBy(c => c.Title),
             _ => query.OrderBy(c => c.Title)
         };

@@ -33,16 +33,17 @@
     <div class="card-body">
         <h1 class="h3">@Model.Course.Title</h1>
         <p>@Model.Course.Description</p>
-        <p class="text-muted small">Тема: @Model.Course.Topic | Рівень: @Model.Course.Level | Ціна: @Model.Course.Price USD</p>
+        <p class="text-muted small">Тема: @Model.Course.Topic | Рівень: @Model.Course.Level.GetDisplayName() | Ціна: @Model.Course.Price.ToString("0") грн</p>
+        <p class="text-muted small">Ментор: @Model.Course.Mentor?.FirstName @Model.Course.Mentor?.LastName (@Model.Course.Mentor?.Email)</p>
 
         @if (User.IsInRole(AppRoles.Student))
         {
             if (Model.EnrollmentStatus is null)
             {
-                <form asp-action="RequestEnrollment" method="post">
+                <form asp-action="RequestEnrollment" method="post" id="paymentForm">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="courseId" value="@Model.Course.Id" />
-                    <button class="btn btn-mint">Подати заявку на курс</button>
+                    <button class="btn btn-mint" type="button" id="startPayment">Оплатити та подати заявку</button>
                 </form>
             }
             else if (Model.EnrollmentStatus == EnrollmentStatus.Pending)
@@ -64,10 +65,32 @@
                 </div>
             </div>
 
-            @if (Model.FinalTest is not null)
+            @if (Model.RatingSummary is not null)
             {
                 <div class="mt-3">
-                    <a class="btn btn-outline-mint btn-sm" asp-action="TakeTest" asp-route-testId="@Model.FinalTest.Id" asp-route-courseId="@Model.Course.Id">Пройти фінальний тест</a>
+                    <div class="alert alert-light mb-2">Ваш рейтинг: @Model.RatingSummary.Points балів, місце @Model.RatingSummary.Rank з @Model.RatingSummary.TotalStudents</div>
+                    <a class="btn btn-outline-mint btn-sm" asp-action="Rating" asp-route-courseId="@Model.Course.Id">Переглянути рейтинг курсу</a>
+                </div>
+            }
+
+            @if (Model.FinalTest is not null)
+            {
+                var finalScore = Model.TestScores.TryGetValue(Model.FinalTest.Id, out var score) ? score : (decimal?)null;
+                <div class="mt-3">
+                    @if (finalScore.HasValue)
+                    {
+                        <p class="small text-muted mb-2">Фінальний тест: @finalScore.Value%</p>
+                    }
+                    @if (!finalScore.HasValue || finalScore.Value < 100)
+                    {
+                        <a class="btn btn-outline-mint btn-sm" asp-action="TakeTest" asp-route-testId="@Model.FinalTest.Id" asp-route-courseId="@Model.Course.Id">
+                            @(finalScore.HasValue ? "Перепройти фінальний тест" : "Пройти фінальний тест")
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success small mb-0">Фінальний тест пройдено на максимум.</div>
+                    }
                 </div>
             }
 
@@ -124,25 +147,89 @@
 
                         @if (module.Test is not null && User.IsInRole(AppRoles.Student) && isApproved)
                         {
-                            <a class="btn btn-outline-mint btn-sm mb-3" asp-action="TakeTest" asp-route-testId="@module.Test.Id" asp-route-courseId="@Model.Course.Id">Пройти тест</a>
+                            var moduleScore = Model.TestScores.TryGetValue(module.Test.Id, out var score) ? score : (decimal?)null;
+                            if (moduleScore.HasValue)
+                            {
+                                <p class="small text-muted mb-2">Результат тесту: @moduleScore.Value%</p>
+                            }
+                            if (!moduleScore.HasValue || moduleScore.Value < 100)
+                            {
+                                <a class="btn btn-outline-mint btn-sm mb-3" asp-action="TakeTest" asp-route-testId="@module.Test.Id" asp-route-courseId="@Model.Course.Id">
+                                    @(moduleScore.HasValue ? "Перепройти тест" : "Пройти тест")
+                                </a>
+                            }
+                            else
+                            {
+                                <div class="alert alert-success small mb-3">Тест пройдено на максимум.</div>
+                            }
                         }
 
                         @if (module.PracticalTask is not null && User.IsInRole(AppRoles.Student) && isApproved)
                         {
+                            var grade = Model.PracticalGrades.TryGetValue(module.PracticalTask.Id, out var g) ? g : null;
                             <h6>Практичне завдання: @module.PracticalTask.Title</h6>
                             <p>@module.PracticalTask.Description</p>
-                            <form asp-action="SubmitTask" method="post">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="TaskId" value="@module.PracticalTask.Id" />
-                                <input type="hidden" name="CourseId" value="@Model.Course.Id" />
-                                <textarea name="AnswerText" class="form-control mb-2" rows="3" placeholder="Ваша відповідь"></textarea>
-                                <button class="btn btn-mint btn-sm">Надіслати відповідь</button>
-                            </form>
+                            if (grade.HasValue)
+                            {
+                                <p class="small text-muted mb-2">Оцінка: @grade.Value</p>
+                            }
+                            if (!grade.HasValue || grade.Value < 100)
+                            {
+                                <form asp-action="SubmitTask" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="TaskId" value="@module.PracticalTask.Id" />
+                                    <input type="hidden" name="CourseId" value="@Model.Course.Id" />
+                                    <textarea name="AnswerText" class="form-control mb-2" rows="3" placeholder="Ваша відповідь"></textarea>
+                                    <button class="btn btn-mint btn-sm">@(grade.HasValue ? "Перездати" : "Надіслати відповідь")</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <div class="alert alert-success small">Завдання виконано на максимум.</div>
+                            }
                         }
                     </div>
                 </div>
             </div>
         }
     </div>
+}
+
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Оплата курсу</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="paymentSpinner" class="spinner-border text-success mb-3" role="status"></div>
+                <p id="paymentStatusText" class="mb-0">Обробляємо оплату...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        const payButton = document.getElementById("startPayment");
+        if (payButton) {
+            payButton.addEventListener("click", () => {
+                const modalElement = document.getElementById("paymentModal");
+                const modal = new bootstrap.Modal(modalElement);
+                const spinner = document.getElementById("paymentSpinner");
+                const statusText = document.getElementById("paymentStatusText");
+                spinner.classList.remove("d-none");
+                statusText.textContent = "Обробляємо оплату...";
+                modal.show();
+                setTimeout(() => {
+                    spinner.classList.add("d-none");
+                    statusText.textContent = "Оплата пройшла, чекаємо поки ментор прийме вашу заявку";
+                    setTimeout(() => document.getElementById("paymentForm").submit(), 800);
+                }, 5000);
+            });
+        }
+    </script>
 }
 

@@ -1,0 +1,42 @@
+@model CourseRatingViewModel
+@{
+    ViewData["Title"] = $"Рейтинг курсу: {Model.CourseTitle}";
+}
+
+<div class="card soft-card">
+    <div class="card-body">
+        <h1 class="h4 mb-3">Рейтинг курсу: @Model.CourseTitle</h1>
+
+        @if (!Model.Entries.Any())
+        {
+            <div class="alert alert-info">Ще немає учасників рейтингу.</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Місце</th>
+                            <th>Студент</th>
+                            <th>Бали</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var entry in Model.Entries)
+                        {
+                            <tr>
+                                <td>@entry.Rank</td>
+                                <td>@entry.StudentName</td>
+                                <td>@entry.Points</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <a class="btn btn-outline-mint" asp-action="Details" asp-route-id="@Model.CourseId">Назад до курсу</a>
+    </div>
+</div>
+
