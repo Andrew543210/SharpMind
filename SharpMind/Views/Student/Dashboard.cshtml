@@ -1,18 +1,42 @@
-﻿@model List<SharpMind.ViewModels.Student.StudentDashboardCourseVm>
+﻿@model SharpMind.ViewModels.Student.StudentDashboardViewModel
 @{
     ViewData["Title"] = "Мій кабінет";
 }
 
 <h1 class="h3 mb-3">Мій кабінет</h1>
 
-@if (!Model.Any())
+@if (Model.Certificates.Any())
+{
+    <h2 class="h4 mb-3">Мої сертифікати</h2>
+    <div class="row g-3 mb-4">
+        @foreach (var cert in Model.Certificates)
+        {
+            <div class="col-md-6">
+                <div class="card soft-card">
+                    <div class="card-body">
+                        <h5>@cert.PlatformName</h5>
+                        <p class="small text-muted">Курс: @cert.CourseName</p>
+                        <p class="small text-muted">Ментор: @cert.MentorName</p>
+                        <p class="small text-muted">Результат: @cert.FinalTestScore.ToString("F1")%</p>
+                        <p class="small text-muted">Дата отримання: @cert.IssueDate.ToLocalTime().ToString("dd.MM.yyyy")</p>
+                        <a class="btn btn-mint btn-sm" asp-action="DownloadCertificate" asp-route-certificateId="@cert.Id" download>Завантажити</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<h2 class="h4 mb-3">Мої курси</h2>
+
+@if (!Model.Courses.Any())
 {
     <div class="alert alert-info">У вас ще немає підтверджених курсів.</div>
 }
 else
 {
     <div class="row g-3">
-        @foreach (var course in Model)
+        @foreach (var course in Model.Courses)
         {
             <div class="col-md-6">
                 <div class="card soft-card h-100">
@@ -22,9 +46,17 @@ else
                         <div class="progress mint-progress mb-2">
                             <div class="progress-bar" role="progressbar" style="width:@course.ProgressPercent%">@course.ProgressPercent%</div>
                         </div>
+                        <p class="small text-muted mb-2">Вимоги для сертифіката: завершити мінімум 4 модулі (тести ≥60%, практичні завдання оцінені) та фінальний тест ≥80%.</p>
                         <p class="small text-muted mb-2">Рейтинг: @course.RatingPoints балів, місце @course.RatingRank з @course.RatingTotal</p>
                         <a class="btn btn-outline-mint btn-sm" asp-controller="Courses" asp-action="Details" asp-route-id="@course.CourseId">Перейти до курсу</a>
                         <a class="btn btn-outline-mint btn-sm ms-2" asp-controller="Courses" asp-action="Rating" asp-route-courseId="@course.CourseId">Рейтинг курсу</a>
+                        @if (course.CanGetCertificate && !course.CertificateId.HasValue)
+                        {
+                            <form asp-action="GenerateCertificate" asp-route-courseId="@course.CourseId" method="post" class="d-inline ms-2">
+                                @Html.AntiForgeryToken()
+                                <button class="btn btn-success btn-sm">Згенерувати сертифікат</button>
+                            </form>
+                        }
                         @if (course.CertificateId.HasValue)
                         {
                             <a class="btn btn-mint btn-sm ms-2" asp-controller="Courses" asp-action="Certificate" asp-route-id="@course.CertificateId.Value">Сертифікат</a>

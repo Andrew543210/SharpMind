@@ -65,3 +65,10 @@
     }
 </div>
 
+<script>
+    document.querySelectorAll('select, input[type="radio"]').forEach(el => {
+        el.addEventListener('change', () => {
+            el.closest('form').submit();
+        });
+    });
+</script>

@@ -42,16 +42,23 @@ public class CourseCatalogService(ApplicationDbContext dbContext) : ICourseCatal
             query = query.Where(c => c.Price <= filter.PriceTo.Value);
         }
 
+        // Applying sorting before ToListAsync to avoid client-side evaluation issues
         query = filter.SortBy switch
         {
             CourseSortType.Name when filter.SortDescending => query.OrderByDescending(c => c.Title),
             CourseSortType.Name => query.OrderBy(c => c.Title),
             CourseSortType.Price when filter.SortDescending => query.OrderByDescending(c => c.Price).ThenBy(c => c.Title),
             CourseSortType.Price => query.OrderBy(c => c.Price).ThenBy(c => c.Title),
-            CourseSortType.Popularity when filter.SortDescending => query.OrderByDescending(c => c.Enrollments.Count(e => e.Status == EnrollmentStatus.Approved))
-                .ThenBy(c => c.Title),
-            CourseSortType.Popularity => query.OrderBy(c => c.Enrollments.Count(e => e.Status == EnrollmentStatus.Approved))
-                .ThenBy(c => c.Title),
+            CourseSortType.Popularity when filter.SortDescending => query
+                .AsEnumerable()
+                .OrderByDescending(c => c.Enrollments.Count(e => e.Status == EnrollmentStatus.Approved))
+                .ThenBy(c => c.Title)
+                .AsQueryable(),
+            CourseSortType.Popularity => query
+                .AsEnumerable()
+                .OrderBy(c => c.Enrollments.Count(e => e.Status == EnrollmentStatus.Approved))
+                .ThenBy(c => c.Title)
+                .AsQueryable(),
             _ => query.OrderBy(c => c.Title)
         };
 

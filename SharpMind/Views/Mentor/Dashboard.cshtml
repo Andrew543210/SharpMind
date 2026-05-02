@@ -1,4 +1,4 @@
-﻿@model List<Course>
+﻿@model List<SharpMind.ViewModels.Mentor.MentorDashboardCourseVm>
 @{
     ViewData["Title"] = "Панель ментора";
 }
@@ -17,8 +17,8 @@
                     <h5>@course.Title</h5>
                     <p class="small text-muted">@course.Topic | @course.Level</p>
                     <p>@course.Description</p>
-                    <p class="small">Модулі: @course.Modules.Count | Студенти: @course.Enrollments.Count(e => e.Status == EnrollmentStatus.Approved)</p>
-                    <a class="btn btn-outline-mint btn-sm" asp-action="EditCourse" asp-route-courseId="@course.Id">Редагувати курс</a>
+                    <p class="small">Модулі: @course.ModulesCount | Студенти: @course.StudentsCount | Рейтинг: @course.AverageRating</p>
+                    <a class="btn btn-outline-mint btn-sm" asp-action="EditCourse" asp-route-courseId="@course.CourseId">Редагувати курс</a>
                 </div>
             </div>
         </div>
@@ -29,4 +29,3 @@
     <a class="btn btn-outline-mint" asp-action="EnrollmentRequests">Заявки на enrollment</a>
     <a class="btn btn-outline-mint" asp-action="Submissions">Практичні відповіді</a>
 </div>
-

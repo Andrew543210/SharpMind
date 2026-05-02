@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SharpMind.Data;
 
@@ -10,9 +11,11 @@ using SharpMind.Data;
 namespace SharpMind.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260502085212_UpdateCertificateModel")]
+    partial class UpdateCertificateModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
@@ -517,45 +520,6 @@ namespace SharpMind.Migrations
                     b.ToTable("Questions");
                 });
 
-            modelBuilder.Entity("SharpMind.Models.SupportTicket", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("AdminResponse")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsResolved")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("ResponseAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("StudentId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("SupportTickets");
-                });
-
             modelBuilder.Entity("SharpMind.Models.Test", b =>
                 {
                     b.Property<int>("Id")
@@ -787,17 +751,6 @@ namespace SharpMind.Migrations
                         .IsRequired();
 
                     b.Navigation("Test");
-                });
-
-            modelBuilder.Entity("SharpMind.Models.SupportTicket", b =>
-                {
-                    b.HasOne("SharpMind.Models.Identity.ApplicationUser", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("SharpMind.Models.Test", b =>

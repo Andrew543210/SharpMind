@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SharpMind.Data;
 using SharpMind.Models;
+using SharpMind.Services;
 using SharpMind.ViewModels.Mentor;
 
 namespace SharpMind.Controllers;
 
 [Authorize(Roles = "Mentor")]
-public class MentorController(ApplicationDbContext dbContext) : Controller
+public class MentorController(ApplicationDbContext dbContext, IProgressService progressService) : Controller
 {
     public async Task<IActionResult> Dashboard()
     {
@@ -22,7 +23,24 @@ public class MentorController(ApplicationDbContext dbContext) : Controller
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();
 
-        return View(courses);
+        var model = new List<MentorDashboardCourseVm>();
+        foreach (var course in courses)
+        {
+            var averageRating = 0m;
+            model.Add(new MentorDashboardCourseVm
+            {
+                CourseId = course.Id,
+                Title = course.Title,
+                Topic = course.Topic.ToString(),
+                Level = course.Level,
+                Description = course.Description,
+                ModulesCount = course.Modules.Count,
+                StudentsCount = course.Enrollments.Count(e => e.Status == EnrollmentStatus.Approved),
+                AverageRating = averageRating
+            });
+        }
+
+        return View(model);
     }
 
     [HttpGet]
@@ -247,7 +265,13 @@ public class MentorController(ApplicationDbContext dbContext) : Controller
             .OrderByDescending(s => s.SubmittedAt)
             .ToListAsync();
 
-        return View(submissions);
+        var model = new MentorSubmissionsViewModel
+        {
+            Graded = submissions.Where(s => s.Status == SubmissionStatus.Graded).ToList(),
+            Pending = submissions.Where(s => s.Status == SubmissionStatus.Pending).ToList()
+        };
+
+        return View(model);
     }
 
     [HttpPost]

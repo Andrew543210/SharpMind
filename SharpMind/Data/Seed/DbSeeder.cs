@@ -1026,7 +1026,19 @@ public static class DbSeeder
             ],
             "Оптимізуйте обробку великого тексту: замініть конкатенацію рядків у циклі на StringBuilder і покажіть різницю в підході. Код надішліть текстом."));
 
-        course.Tests.Add(BuildFinalTest("Final test for C# Advanced", BuildFinalPlaceholderQuestions()));
+         course.Tests.Add(BuildFinalTest("Final test for C# Advanced",
+        [
+            Q("Що таке делегат в C#?", ("Тип, що посилається на метод", true), ("Клас для роботи з файлами", false), ("Атрибут", false), ("Інтерфейс", false)),
+            Q("Який модифікатор доступу дозволяє бачити метод лише в поточному класі та його нащадках?", ("private", false), ("protected", true), ("internal", false), ("public", false)),
+            Q("Що таке лямбда-вираз?", ("Анонімна функція", true), ("Цикл", false), ("Умовний оператор", false), ("Клас", false)),
+            Q("Який інтерфейс реалізує колекція, що дозволяє перебір foreach?", ("IEnumerable", true), ("ICollection", false), ("IList", false), ("IDictionary", false)),
+            Q("Що таке LINQ?", ("Мова запитів до даних", true), ("Система логування", false), ("Бібліотека для графіки", false), ("Фреймворк для тестування", false)),
+            Q("Який атрибут використовується для серіалізації JSON?", ("[JsonIgnore]", false), ("[JsonProperty]", true), ("[JsonArray]", false), ("[JsonObject]", false)),
+            Q("Що таке async/await?", ("Механізм асинхронного програмування", true), ("Синхронний виклик", false), ("Ключові слова для циклів", false), ("Типи даних", false)),
+            Q("Який простір імен містить List<T>?", ("System.Collections.Generic", true), ("System.Collections", false), ("System.Linq", false), ("System.Threading", false)),
+            Q("Що таке Exception?", ("Помилка, що виникає під час виконання", true), ("Тип даних", false), ("Метод", false), ("Клас для роботи з файлами", false)),
+            Q("Який оператор використовується для приведення типів з перевіркою?", ("as", true), ("is", false), ("typeof", false), ("cast", false))
+        ]));
     }
 
     private static async Task RebuildJavaScriptFullStackAsync(ApplicationDbContext dbContext, Course course)
@@ -1078,7 +1090,19 @@ public static class DbSeeder
             BuildPlaceholderQuestions("Testing and deployment"),
             "Напишіть один unit-тест для сервісу й опишіть кроки деплою в Docker. Код/інструкцію надішліть текстом."));
 
-        course.Tests.Add(BuildFinalTest("Final test for JavaScript Full-Stack", BuildFinalPlaceholderQuestions()));
+        course.Tests.Add(BuildFinalTest("Final test for JavaScript Full-Stack",
+        [
+            Q("Що таке Node.js?", ("Середовище виконання JavaScript на сервері", true), ("Браузер", false), ("База даних", false), ("CSS-фреймворк", false)),
+            Q("Яка функція створює сервер в Express.js?", ("app.listen()", true), ("server.create()", false), ("http.createServer()", false), ("express.run()", false)),
+            Q("Що таке NPM?", ("Менеджер пакетів для Node.js", true), ("Мова програмування", false), ("Фреймворк", false), ("Система контролю версій", false)),
+            Q("Як експортувати модуль в Node.js?", ("module.exports", true), ("export default", false), ("exports", false), ("require", false)),
+            Q("Що таке Promise?", ("Об'єкт для роботи з асинхронними операціями", true), ("Функція зворотного виклику", false), ("Цикл", false), ("Тип даних", false)),
+            Q("Яка команда встановлює залежності з package.json?", ("npm install", true), ("npm start", false), ("npm run", false), ("npm build", false)),
+            Q("Що таке MongoDB?", ("NoSQL база даних", true), ("Реляційна база даних", false), ("Хмарний сервіс", false), ("Графічна бібліотека", false)),
+            Q("Як отримати доступ до змінних оточення в Node.js?", ("process.env", true), ("env", false), ("process.vars", false), ("system.env", false)),
+            Q("Що таке REST API?", ("Архітектурний стиль для веб-сервісів", true), ("База даних", false), ("Протокол передачі файлів", false), ("Мова розмітки", false)),
+            Q("Який метод HTTP використовується для отримання даних?", ("GET", true), ("POST", false), ("PUT", false), ("DELETE", false))
+        ]));
     }
 
     private static async Task RebuildPythonForDataScienceAsync(ApplicationDbContext dbContext, Course course)
@@ -1130,7 +1154,20 @@ public static class DbSeeder
             BuildPlaceholderQuestions("Model evaluation and deployment"),
             "Створіть пайплайн передобробки + моделі та оцініть її через cross-validation. Код надішліть текстом."));
 
-        course.Tests.Add(BuildFinalTest("Final test for Python for Data Science", BuildFinalPlaceholderQuestions()));
+        course.Tests.Add(BuildFinalTest("Final test for Python for Data Science",
+        [
+            Q("Що таке NumPy?", ("Бібліотека для роботи з масивами та математичними операціями", true), ("Бібліотека для візуалізації", false), ("Фреймворк для веб-розробки", false), ("Система керування базами даних", false)),
+            Q("Що таке Pandas?", ("Бібліотека для аналізу даних", true), ("Бібліотека для машинного навчання", false), ("Фреймворк для веб-розробки", false), ("Система візуалізації", false)),
+            Q("Яка структура даних в Pandas є аналогом таблиці?", ("DataFrame", true), ("Series", false), ("Array", false), ("List", false)),
+            Q("Яка функція завантажує CSV-файл в Pandas?", ("pd.read_csv()", true), ("pd.load_csv()", false), ("pd.from_csv()", false), ("pd.import_csv()", false)),
+            Q("Що таке Jupyter Notebook?", ("Інтерактивне середовище для аналізу даних", true), ("IDE для Python", false), ("Система контролю версій", false), ("База даних", false)),
+            Q("Яка бібліотека використовується для побудови графіків?", ("Matplotlib", true), ("NumPy", false), ("SciPy", false), ("TensorFlow", false)),
+            Q("Що таке машинне навчення?", ("Підхід, де модель вчиться на даних", true), ("Просте програмування", false), ("База даних", false), ("Хмарні обчислення", false)),
+            Q("Яка функція обчислює середнє арифметичне в NumPy?", ("np.mean()", true), ("np.average()", false), ("np.median()", false), ("np.sum()", false)),
+            Q("Що таке scikit-learn?", ("Бібліотека для машинного навчання", true), ("Бібліотека для візуалізації", false), ("Фреймворк для веб-розробки", false), ("База даних", false)),
+            Q("Як виконати лінійну регресію в scikit-learn?", ("LinearRegression", true), ("LogisticRegression", false), ("SVM", false), ("KMeans", false)),
+            Q("Що таке train_test_split?", ("Розбиває дані на навчальну та тестову вибірки", true), ("Тренує модель", false), ("Оцінює модель", false), ("Візуалізує дані", false))
+        ]));
     }
 
     private static async Task PurgeCourseContentAsync(ApplicationDbContext dbContext, int courseId)
@@ -1306,4 +1343,5 @@ public static class DbSeeder
     private sealed record OptionSeed(string Text, bool IsCorrect);
     private sealed record QuestionSeed(string Text, List<OptionSeed> Options);
 }
+
 

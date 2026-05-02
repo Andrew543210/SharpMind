@@ -19,6 +19,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TestResult> TestResults => Set<TestResult>();
     public DbSet<Enrollment> Enrollments => Set<Enrollment>();
     public DbSet<Certificate> Certificates => Set<Certificate>();
+    public DbSet<SupportTicket> SupportTickets => Set<SupportTicket>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -139,6 +140,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         builder.Entity<Certificate>()
             .HasIndex(c => c.UniqueNumber)
             .IsUnique();
+
+        builder.Entity<SupportTicket>()
+            .HasOne(s => s.Student)
+            .WithMany()
+            .HasForeignKey(s => s.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
 

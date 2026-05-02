@@ -1,0 +1,134 @@
+@model PaymentViewModel
+@{
+    ViewData["Title"] = "Оплата курсу";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card soft-card">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">Оплата курсу</h2>
+                    
+                    <div class="alert alert-info mb-3">
+                        <strong>@Model.CourseName</strong>
+                        <br />
+                        Вартість: <strong>@Model.Price.ToString("F2") грн</strong>
+                    </div>
+
+                    <form id="paymentForm" asp-action="ProcessPayment" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="CourseId" />
+
+                        <div class="mb-3">
+                            <label asp-for="CardNumber" class="form-label">Номер картки</label>
+                            <input asp-for="CardNumber" 
+                                   class="form-control" 
+                                   placeholder="4111111111111111" 
+                                   inputmode="numeric"
+                                   maxlength="16"
+                                   pattern="\d{16}" />
+                            <span asp-validation-for="CardNumber" class="text-danger"></span>
+                            <small class="form-text text-muted">16 цифр, починає з 41</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ExpiryDate" class="form-label">Термін дії</label>
+                                <input asp-for="ExpiryDate" 
+                                       class="form-control" 
+                                       placeholder="MM/РР" 
+                                       maxlength="5"
+                                       pattern="\d{2}/\d{2}" />
+                                <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+                                <small class="form-text text-muted">МM/РР</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CVV" class="form-label">CVV</label>
+                                <input asp-for="CVV" 
+                                       class="form-control" 
+                                       placeholder="123" 
+                                       inputmode="numeric"
+                                       maxlength="3"
+                                       pattern="\d{3}" />
+                                <span asp-validation-for="CVV" class="text-danger"></span>
+                                <small class="form-text text-muted">3 цифри</small>
+                            </div>
+                        </div>
+
+                        <div id="paymentStatus" class="alert alert-info d-none mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Обробка...</span>
+                                </div>
+                                <span id="statusText">Обробка платежу...</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="submitBtn" class="btn btn-mint w-100 mb-2">
+                            Сплатити @Model.Price.ToString("F2") грн
+                        </button>
+                        <a asp-action="Details" asp-route-id="@Model.CourseId" class="btn btn-outline-mint w-100">
+                            Скасувати
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('paymentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const statusDiv = document.getElementById('paymentStatus');
+    const statusText = document.getElementById('statusText');
+    
+    submitBtn.disabled = true;
+    statusDiv.classList.remove('d-none');
+    
+    const stages = [
+        'Виконання валідації...',
+        'Підключення до платіжного сервісу...',
+        'Обробка платежу...',
+        'Фіналізація транзакції...',
+        'Оплата пройшла успішно!'
+    ];
+    
+    let stageIndex = 0;
+    const stageInterval = setInterval(() => {
+        if (stageIndex < stages.length) {
+            statusText.textContent = stages[stageIndex];
+            stageIndex++;
+        } else {
+            clearInterval(stageInterval);
+        }
+    }, 1000);
+    
+    setTimeout(() => {
+        this.submit();
+    }, 5000);
+});
+
+// Форматування номера картки
+document.getElementById('CardNumber').addEventListener('input', function(e) {
+    this.value = this.value.replace(/\D/g, '').substring(0, 16);
+});
+
+// Форматування терміну дії
+document.getElementById('ExpiryDate').addEventListener('input', function(e) {
+    let value = this.value.replace(/\D/g, '');
+    if (value.length >= 2) {
+        value = value.substring(0, 2) + '/' + value.substring(2, 4);
+    }
+    this.value = value;
+});
+
+// Форматування CVV
+document.getElementById('CVV').addEventListener('input', function(e) {
+    this.value = this.value.replace(/\D/g, '').substring(0, 3);
+});
+</script>
+

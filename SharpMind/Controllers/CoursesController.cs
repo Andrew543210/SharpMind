@@ -368,5 +368,102 @@ public class CoursesController(
         return await dbContext.Enrollments.AnyAsync(e =>
             e.CourseId == courseId && e.StudentId == userId && e.Status == EnrollmentStatus.Approved);
     }
+
+    [Authorize(Roles = "Student")]
+    [HttpGet]
+    public async Task<IActionResult> Checkout(int courseId)
+    {
+        var course = await dbContext.Courses
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == courseId && c.IsPublished);
+
+        if (course is null)
+        {
+            return NotFound();
+        }
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var existingEnrollment = await dbContext.Enrollments
+            .AsNoTracking()
+            .AnyAsync(e => e.CourseId == courseId && e.StudentId == userId);
+
+        if (existingEnrollment)
+        {
+            return RedirectToAction(nameof(Details), new { id = courseId });
+        }
+
+        var model = new PaymentViewModel
+        {
+            CourseId = courseId,
+            CourseName = course.Title,
+            Price = course.Price
+        };
+
+        return View(model);
+    }
+
+    [Authorize(Roles = "Student")]
+    [HttpPost]
+    public async Task<IActionResult> ProcessPayment(PaymentViewModel model)
+    {
+        var course = await dbContext.Courses
+            .FirstOrDefaultAsync(c => c.Id == model.CourseId && c.IsPublished);
+
+        if (course is null)
+        {
+            return NotFound();
+        }
+
+        if (!ModelState.IsValid)
+        {
+            model.CourseName = course.Title;
+            model.Price = course.Price;
+            return View("Checkout", model);
+        }
+
+        var paymentService = new PaymentService();
+        var (isValid, message) = paymentService.ValidatePayment(model.CardNumber, model.ExpiryDate, model.CVV);
+
+        if (!isValid)
+        {
+            ModelState.AddModelError("", message);
+            model.CourseName = course.Title;
+            model.Price = course.Price;
+            return View("Checkout", model);
+        }
+
+        // Симуляція обробки платежу - 5 секунд
+        await Task.Delay(5000);
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        // Перевіряємо, чи не було вже енролмента
+        var existingEnrollment = await dbContext.Enrollments
+            .FirstOrDefaultAsync(e => e.CourseId == model.CourseId && e.StudentId == userId);
+
+        if (existingEnrollment != null)
+        {
+            if (existingEnrollment.Status != EnrollmentStatus.Approved)
+            {
+                existingEnrollment.Status = EnrollmentStatus.Approved;
+            }
+        }
+        else
+        {
+            var enrollment = new Enrollment
+            {
+                CourseId = model.CourseId,
+                StudentId = userId,
+                Status = EnrollmentStatus.Approved,
+                EnrolledAt = DateTime.UtcNow
+            };
+            dbContext.Enrollments.Add(enrollment);
+        }
+
+        await dbContext.SaveChangesAsync();
+
+        TempData["Success"] = "Оплата пройшла успішно! Ви тепер маєте доступ до курсу.";
+        return RedirectToAction(nameof(Details), new { id = model.CourseId });
+    }
 }
 

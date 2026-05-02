@@ -40,11 +40,7 @@
         {
             if (Model.EnrollmentStatus is null)
             {
-                <form asp-action="RequestEnrollment" method="post" id="paymentForm">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="courseId" value="@Model.Course.Id" />
-                    <button class="btn btn-mint" type="button" id="startPayment">Оплатити та подати заявку</button>
-                </form>
+                <a asp-action="Checkout" asp-route-courseId="@Model.Course.Id" class="btn btn-mint">Оплатити та подати заявку</a>
             }
             else if (Model.EnrollmentStatus == EnrollmentStatus.Pending)
             {

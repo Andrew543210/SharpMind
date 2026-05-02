@@ -1,40 +1,76 @@
-﻿@model List<PracticalSubmission>
+﻿@model SharpMind.ViewModels.Mentor.MentorSubmissionsViewModel
 @{
     ViewData["Title"] = "Практичні відповіді";
 }
 
 <h1 class="h3 mb-3">Відповіді студентів</h1>
 
-@if (!Model.Any())
-{
-    <div class="alert alert-info">Надсилань поки немає.</div>
-}
-else
-{
-    @foreach (var s in Model)
-    {
-        <div class="card soft-card mb-3">
-            <div class="card-body">
-                <h5>@s.Task!.Module!.Course!.Title - @s.Task.Title</h5>
-                <p class="small text-muted">Студент: @s.Student!.Email | @s.SubmittedAt.ToLocalTime().ToString("g")</p>
-                <p>@s.AnswerText</p>
-                <p class="small">Статус: <strong>@s.Status</strong></p>
+<ul class="nav nav-tabs" id="submissionTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="true">Очікують перевірки (@Model.Pending.Count)</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="graded-tab" data-bs-toggle="tab" data-bs-target="#graded" type="button" role="tab" aria-controls="graded" aria-selected="false">Перевірені (@Model.Graded.Count)</button>
+    </li>
+</ul>
 
-                <form asp-action="GradeSubmission" method="post" class="row g-2">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="SubmissionId" value="@s.Id" />
-                    <div class="col-md-2">
-                        <input name="Grade" value="@(s.Grade ?? 0)" class="form-control" type="number" min="0" max="100" />
-                    </div>
-                    <div class="col-md-7">
-                        <input name="MentorComment" value="@s.MentorComment" class="form-control" placeholder="Коментар" />
-                    </div>
-                    <div class="col-md-3 d-grid">
-                        <button class="btn btn-mint btn-sm">Зберегти оцінку</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    }
-}
+<div class="tab-content mt-3" id="submissionTabsContent">
+    <div class="tab-pane fade show active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+        @if (!Model.Pending.Any())
+        {
+            <div class="alert alert-info">Немає відповідей, що очікують перевірки.</div>
+        }
+        else
+        {
+            @foreach (var s in Model.Pending)
+            {
+                <div class="card soft-card mb-3">
+                    <div class="card-body">
+                        <h5>@s.Task!.Module!.Course!.Title - @s.Task.Title</h5>
+                        <p class="small text-muted">Студент: @s.Student!.Email | @s.SubmittedAt.ToLocalTime().ToString("g")</p>
+                        <p>@s.AnswerText</p>
+                        <p class="small">Статус: <strong>@s.Status</strong></p>
 
+                        <form asp-action="GradeSubmission" method="post" class="row g-2">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="SubmissionId" value="@s.Id" />
+                            <div class="col-md-2">
+                                <input name="Grade" value="@(s.Grade ?? 0)" class="form-control" type="number" min="0" max="100" />
+                            </div>
+                            <div class="col-md-7">
+                                <input name="MentorComment" value="@s.MentorComment" class="form-control" placeholder="Коментар" />
+                            </div>
+                            <div class="col-md-3 d-grid">
+                                <button class="btn btn-mint btn-sm">Зберегти оцінку</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+    <div class="tab-pane fade" id="graded" role="tabpanel" aria-labelledby="graded-tab">
+        @if (!Model.Graded.Any())
+        {
+            <div class="alert alert-info">Немає перевірених відповідей.</div>
+        }
+        else
+        {
+            @foreach (var s in Model.Graded)
+            {
+                <div class="card soft-card mb-3">
+                    <div class="card-body">
+                        <h5>@s.Task!.Module!.Course!.Title - @s.Task.Title</h5>
+                        <p class="small text-muted">Студент: @s.Student!.Email | @s.SubmittedAt.ToLocalTime().ToString("g")</p>
+                        <p>@s.AnswerText</p>
+                        <p class="small">Статус: <strong>@s.Status</strong> | Оцінка: <strong>@s.Grade</strong></p>
+                        @if (!string.IsNullOrWhiteSpace(s.MentorComment))
+                        {
+                            <p class="small"><em>Коментар: @s.MentorComment</em></p>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

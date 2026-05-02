@@ -151,10 +151,25 @@ public class ProgressService(ApplicationDbContext dbContext) : IProgressService
             .Select(u => new { u.FirstName, u.LastName })
             .FirstAsync();
 
-        var course = await dbContext.Courses
+        var courseInfo = await dbContext.Courses
             .Where(c => c.Id == courseId)
-            .Select(c => c.Title)
+            .Include(c => c.Mentor)
+            .Select(c => new { c.Title, MentorName = c.Mentor != null ? $"{c.Mentor.FirstName} {c.Mentor.LastName}".Trim() : "Невідомо" })
             .FirstAsync();
+
+        var finalTestId = await dbContext.Tests
+            .Where(t => t.CourseId == courseId && t.IsFinal)
+            .Select(t => (int?)t.Id)
+            .FirstOrDefaultAsync();
+
+        var finalTestScore = 0m;
+        if (finalTestId.HasValue)
+        {
+            finalTestScore =  await dbContext.TestResults
+                .Where(r => r.StudentId == studentId && r.TestId == finalTestId.Value)
+                .Select(r => r.ScorePercent)
+                .MaxAsync();
+        }
 
         var certificate = new Models.Certificate
         {
@@ -163,8 +178,10 @@ public class ProgressService(ApplicationDbContext dbContext) : IProgressService
             IssueDate = DateTime.UtcNow,
             UniqueNumber = Guid.NewGuid(),
             FullName = $"{student.FirstName} {student.LastName}".Trim(),
-            CourseName = course,
-            PlatformName = "SharpMind"
+            CourseName = courseInfo.Title,
+            PlatformName = "SharpMind",
+            MentorName = courseInfo.MentorName,
+            FinalTestScore = finalTestScore
         };
 
         dbContext.Certificates.Add(certificate);
@@ -264,6 +281,12 @@ public class ProgressService(ApplicationDbContext dbContext) : IProgressService
         }
 
         return ranked;
+    }
+
+    public async Task<decimal> GetCourseAverageRatingAsync(int courseId)
+    {
+        var entries = await GetCourseRatingEntriesAsync(courseId);
+        return entries.Any() ? Math.Round(entries.Average(e => e.Points), 1) : 0;
     }
 }
 

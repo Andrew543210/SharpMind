@@ -1,0 +1,40 @@
+@model CreateSupportTicketViewModel
+@{
+    ViewData["Title"] = "Технічна підтримка";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card soft-card">
+                <div class="card-header">
+                    <h2 class="mb-0">Питання до технічної підтримки</h2>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">Опишіть вашу проблему, і наша команда допоможе вам якомога швидше.</p>
+
+                    <form asp-action="Ask" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label asp-for="Subject" class="form-label">Тема</label>
+                            <input asp-for="Subject" class="form-control" placeholder="Крім цілком: опишіть проблему" />
+                            <span asp-validation-for="Subject" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Message" class="form-label">Повідомлення</label>
+                            <textarea asp-for="Message" rows="6" class="form-control" placeholder="Детально опишіть вашу проблему..."></textarea>
+                            <span asp-validation-for="Message" class="text-danger"></span>
+                            <small class="form-text text-muted">Мінімум 10 символів</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-mint">Надіслати питання</button>
+                        <a asp-action="MyTickets" class="btn btn-outline-mint">Мої питання</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -25,4 +25,9 @@ public class Certificate
 
     [Required, StringLength(120)]
     public string PlatformName { get; set; } = "SharpMind";
+
+    [StringLength(120)]
+    public string? MentorName { get; set; }
+
+    public decimal FinalTestScore { get; set; }
 }
