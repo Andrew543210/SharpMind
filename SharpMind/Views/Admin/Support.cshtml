@@ -1,0 +1,62 @@
+@model List<SupportTicket>
+@{
+    ViewData["Title"] = "Технічна підтримка";
+    var filter = ViewBag.Filter as string;
+}
+
+<h1 class="h3 mb-3">Технічна підтримка</h1>
+
+<div class="mb-3">
+    <a href="@Url.Action("Support", "Admin", new { filter = "pending" })" 
+       class="btn @(filter == "pending" ? "btn-mint" : "btn-outline-mint")">
+        Очікуючі
+    </a>
+    <a href="@Url.Action("Support", "Admin", new { filter = "resolved" })" 
+       class="btn @(filter == "resolved" ? "btn-mint" : "btn-outline-mint")">
+        Вирішені
+    </a>
+</div>
+
+@if (Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Користувач</th>
+                    <th>Тема</th>
+                    <th>Статус</th>
+                    <th>Дія</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ticket in Model)
+                {
+                    <tr>
+                        <td>@ticket.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>@ticket.User?.Email</td>
+                        <td>@ticket.Subject</td>
+                        <td>
+                            <span class="badge @(ticket.Status == TicketStatus.Pending ? "bg-warning-subtle text-warning" : "bg-success-subtle text-success")">
+                                @(ticket.Status == TicketStatus.Pending ? "Очікує" : "Вирішено")
+                            </span>
+                        </td>
+                        <td>
+                            <a asp-action="TicketDetail" asp-route-id="@ticket.Id" class="btn btn-sm btn-outline-mint">
+                                Переглянути
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        Немає тикетів в цій категорії
+    </div>
+}
+

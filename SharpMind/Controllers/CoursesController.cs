@@ -453,7 +453,7 @@ public class CoursesController(
             var enrollment = new Enrollment
             {
                 CourseId = model.CourseId,
-                StudentId = userId,
+                StudentId = userId!,
                 Status = EnrollmentStatus.Approved,
                 EnrolledAt = DateTime.UtcNow
             };

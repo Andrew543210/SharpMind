@@ -33,7 +33,7 @@
                         <div class="card-body">
                             <h5 class="card-title">@ticket.Subject</h5>
                             <p class="small text-muted">
-                                Студент: <strong>@ticket.Student?.Email</strong> | 
+                                <strong>@ticket.User?.Email</strong> | 
                                 @ticket.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
                             </p>
                             <p class="card-text">@ticket.Message</p>
@@ -42,7 +42,7 @@
                                 <input type="hidden" name="ticketId" value="@ticket.Id" />
                                 <div class="mb-3">
                                     <label class="form-label">Ваша відповідь</label>
-                                    <textarea name="response" rows="3" class="form-control" placeholder="Напишіть відповідь студенту..." required></textarea>
+                                    <textarea name="response" rows="3" class="form-control" placeholder="Напишіть відповідь..." required></textarea>
                                 </div>
                                 <button type="submit" class="btn btn-mint btn-sm">Надіслати відповідь</button>
                             </form>
@@ -65,17 +65,17 @@
                         <div class="card-body">
                             <h5 class="card-title">@ticket.Subject</h5>
                             <p class="small text-muted">
-                                Студент: <strong>@ticket.Student?.Email</strong> | 
+                                <strong>@ticket.User?.Email</strong> | 
                                 @ticket.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
                             </p>
                             <p class="card-text"><strong>Питання:</strong> @ticket.Message</p>
 
-                            @if (!string.IsNullOrEmpty(ticket.AdminResponse))
+                            @if (!string.IsNullOrEmpty(ticket.AdminReply))
                             {
                                 <div class="alert alert-success mt-3">
                                     <strong>Ваша відповідь:</strong>
-                                    <p class="mb-0 mt-2">@ticket.AdminResponse</p>
-                                    <small class="text-muted">@ticket.ResponseAt?.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+                                    <p class="mb-0 mt-2">@ticket.AdminReply</p>
+                                    <small class="text-muted">@ticket.ReplyDate?.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
                                 </div>
                             }
                         </div>

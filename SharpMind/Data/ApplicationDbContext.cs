@@ -142,9 +142,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .IsUnique();
 
         builder.Entity<SupportTicket>()
-            .HasOne(s => s.Student)
+            .HasOne(s => s.User)
             .WithMany()
-            .HasForeignKey(s => s.StudentId)
+            .HasForeignKey(s => s.UserId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

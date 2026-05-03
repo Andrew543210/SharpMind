@@ -25,7 +25,7 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h5 class="card-title">@ticket.Subject</h5>
-                                @if (ticket.IsResolved)
+                                @if (ticket.Status == TicketStatus.Resolved)
                                 {
                                     <span class="badge bg-success-subtle">Вирішено</span>
                                 }
@@ -37,12 +37,12 @@
                             <p class="small text-muted">@ticket.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p>
                             <p class="card-text">@ticket.Message</p>
 
-                            @if (!string.IsNullOrEmpty(ticket.AdminResponse))
+                            @if (!string.IsNullOrEmpty(ticket.AdminReply))
                             {
                                 <div class="alert alert-info mt-3">
                                     <strong>Відповідь адміністратора:</strong>
-                                    <p class="mb-0 mt-2">@ticket.AdminResponse</p>
-                                    <small class="text-muted">@ticket.ResponseAt?.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+                                    <p class="mb-0 mt-2">@ticket.AdminReply</p>
+                                    <small class="text-muted">@ticket.ReplyDate?.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
                                 </div>
                             }
                         </div>

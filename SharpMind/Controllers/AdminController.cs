@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SharpMind.Data;
+using SharpMind.Models;
 using SharpMind.Models.Identity;
 using SharpMind.ViewModels.Admin;
 
@@ -169,6 +171,65 @@ public class AdminController(
         }
 
         return RedirectToAction(nameof(Dashboard));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Support(string? filter)
+    {
+        var tickets = string.IsNullOrEmpty(filter) || filter == "pending"
+            ? await dbContext.SupportTickets
+                .Include(t => t.User)
+                .Where(t => t.Status == TicketStatus.Pending)
+                .OrderByDescending(t => t.CreatedAt)
+                .ToListAsync()
+            : await dbContext.SupportTickets
+                .Include(t => t.User)
+                .Where(t => t.Status == TicketStatus.Resolved)
+                .OrderByDescending(t => t.CreatedAt)
+                .ToListAsync();
+
+        ViewBag.Filter = filter ?? "pending";
+        return View(tickets);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> TicketDetail(int id)
+    {
+        var ticket = await dbContext.SupportTickets
+            .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.Id == id);
+
+        if (ticket is null)
+        {
+            return NotFound();
+        }
+
+        return View(ticket);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ReplyToTicket(int ticketId, string reply)
+    {
+        var ticket = await dbContext.SupportTickets.FindAsync(ticketId);
+        if (ticket is null)
+        {
+            return NotFound();
+        }
+
+        if (string.IsNullOrWhiteSpace(reply))
+        {
+            TempData["Error"] = "Відповідь не може бути порожною.";
+            return RedirectToAction(nameof(TicketDetail), new { id = ticketId });
+        }
+
+        ticket.AdminReply = reply;
+        ticket.ReplyDate = DateTime.UtcNow;
+        ticket.Status = TicketStatus.Resolved;
+        await dbContext.SaveChangesAsync();
+
+        TempData["Success"] = "Відповідь надіслана.";
+        return RedirectToAction(nameof(TicketDetail), new { id = ticketId });
     }
 }
 

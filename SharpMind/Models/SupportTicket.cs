@@ -7,8 +7,8 @@ public class SupportTicket
     public int Id { get; set; }
 
     [Required]
-    public string StudentId { get; set; } = string.Empty;
-    public Identity.ApplicationUser? Student { get; set; }
+    public string UserId { get; set; } = string.Empty;
+    public Identity.ApplicationUser? User { get; set; }
 
     [Required, StringLength(120)]
     public string Subject { get; set; } = string.Empty;
@@ -18,9 +18,15 @@ public class SupportTicket
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
-    public string? AdminResponse { get; set; }
-    public DateTime? ResponseAt { get; set; }
+    public string? AdminReply { get; set; }
+    public DateTime? ReplyDate { get; set; }
     
-    public bool IsResolved { get; set; }
+    public TicketStatus Status { get; set; } = TicketStatus.Pending;
+}
+
+public enum TicketStatus
+{
+    Pending,
+    Resolved
 }
 

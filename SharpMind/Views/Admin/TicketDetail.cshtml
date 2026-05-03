@@ -1,0 +1,71 @@
+@model SupportTicket
+@{
+    ViewData["Title"] = "Деталь тикета";
+}
+
+<h1 class="h3 mb-3">Тикет підтримки</h1>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card soft-card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">@Model.Subject</h5>
+                <p class="text-muted small">
+                    <strong>Від:</strong> @Model.User?.Email<br />
+                    <strong>Дата:</strong> @Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")<br />
+                    <strong>Статус:</strong>
+                    <span class="badge @(Model.Status == TicketStatus.Pending ? "bg-warning-subtle text-warning" : "bg-success-subtle text-success")">
+                        @(Model.Status == TicketStatus.Pending ? "Очікує" : "Вирішено")
+                    </span>
+                </p>
+                <hr />
+                <p>@Model.Message</p>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.AdminReply))
+        {
+            <div class="card soft-card mb-3 border-success">
+                <div class="card-body">
+                    <h6 class="card-title text-success">Відповідь адміністратора</h6>
+                    <p class="text-muted small"><strong>Дата:</strong> @Model.ReplyDate?.ToString("dd.MM.yyyy HH:mm")</p>
+                    <p>@Model.AdminReply</p>
+                </div>
+            </div>
+        }
+        else if (Model.Status == TicketStatus.Pending)
+        {
+            <div class="card soft-card">
+                <div class="card-body">
+                    <h6 class="card-title">Відповідь на тикет</h6>
+                    <form asp-action="ReplyToTicket" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="ticketId" value="@Model.Id" />
+                        <div class="mb-3">
+                            <textarea class="form-control" name="reply" rows="5" placeholder="Введіть відповідь..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-mint">Відправити відповідь</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card soft-card">
+            <div class="card-body">
+                <h6 class="card-title">Інформація</h6>
+                <p class="small mb-0">
+                    <strong>ID:</strong> @Model.Id<br />
+                    <strong>Користувач:</strong> @Model.User?.Email<br />
+                    <strong>Статус:</strong> 
+                    <span class="badge @(Model.Status == TicketStatus.Pending ? "bg-warning-subtle text-warning" : "bg-success-subtle text-success")">
+                        @(Model.Status == TicketStatus.Pending ? "Очікує" : "Вирішено")
+                    </span>
+                </p>
+            </div>
+        </div>
+        <a href="@Url.Action("Support", "Admin")" class="btn btn-outline-mint w-100 mt-2">Повернути</a>
+    </div>
+</div>
+

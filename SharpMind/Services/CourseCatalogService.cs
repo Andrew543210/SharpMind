@@ -42,39 +42,46 @@ public class CourseCatalogService(ApplicationDbContext dbContext) : ICourseCatal
             query = query.Where(c => c.Price <= filter.PriceTo.Value);
         }
 
-        // Applying sorting before ToListAsync to avoid client-side evaluation issues
-        query = filter.SortBy switch
-        {
-            CourseSortType.Name when filter.SortDescending => query.OrderByDescending(c => c.Title),
-            CourseSortType.Name => query.OrderBy(c => c.Title),
-            CourseSortType.Price when filter.SortDescending => query.OrderByDescending(c => c.Price).ThenBy(c => c.Title),
-            CourseSortType.Price => query.OrderBy(c => c.Price).ThenBy(c => c.Title),
-            CourseSortType.Popularity when filter.SortDescending => query
-                .AsEnumerable()
-                .OrderByDescending(c => c.Enrollments.Count(e => e.Status == EnrollmentStatus.Approved))
-                .ThenBy(c => c.Title)
-                .AsQueryable(),
-            CourseSortType.Popularity => query
-                .AsEnumerable()
-                .OrderBy(c => c.Enrollments.Count(e => e.Status == EnrollmentStatus.Approved))
-                .ThenBy(c => c.Title)
-                .AsQueryable(),
-            _ => query.OrderBy(c => c.Title)
-        };
-
-        var courses = await query
-            .Select(c => new CourseCardViewModel
+        // First materialize with Select to get the calculated popularity
+        var materialized = await query
+            .Select(c => new
             {
-                Id = c.Id,
-                Title = c.Title,
-                Description = c.Description,
-                Topic = c.Topic,
-                Level = c.Level,
-                Price = c.Price,
-                MentorName = c.Mentor != null ? $"{c.Mentor.FirstName} {c.Mentor.LastName}".Trim() : c.MentorId,
+                Course = c,
                 Popularity = c.Enrollments.Count(e => e.Status == EnrollmentStatus.Approved)
             })
             .ToListAsync();
+
+        // Then apply sorting in-memory to avoid IQueryable/IAsyncEnumerable issues
+        var sorted = filter.SortBy switch
+        {
+            // For Name: invert the sort direction compared to other sorts
+            // Up arrow (↑) = Descending Z->A, Down arrow (↓) = Ascending A->Z
+            CourseSortType.Name when filter.SortDescending => materialized.OrderBy(x => x.Course.Title),
+            CourseSortType.Name => materialized.OrderByDescending(x => x.Course.Title),
+            
+            // Price sorting (normal direction)
+            CourseSortType.Price when filter.SortDescending => materialized.OrderByDescending(x => x.Course.Price).ThenBy(x => x.Course.Title),
+            CourseSortType.Price => materialized.OrderBy(x => x.Course.Price).ThenBy(x => x.Course.Title),
+            
+            // Popularity sorting
+            CourseSortType.Popularity when filter.SortDescending => materialized.OrderByDescending(x => x.Popularity).ThenBy(x => x.Course.Title),
+            CourseSortType.Popularity => materialized.OrderBy(x => x.Popularity).ThenBy(x => x.Course.Title),
+            _ => materialized.OrderBy(x => x.Course.Title)
+        };
+
+        var courses = sorted
+            .Select(x => new CourseCardViewModel
+            {
+                Id = x.Course.Id,
+                Title = x.Course.Title,
+                Description = x.Course.Description,
+                Topic = x.Course.Topic,
+                Level = x.Course.Level,
+                Price = x.Course.Price,
+                MentorName = x.Course.Mentor != null ? $"{x.Course.Mentor.FirstName} {x.Course.Mentor.LastName}".Trim() : x.Course.MentorId,
+                Popularity = x.Popularity
+            })
+            .ToList();
 
         return new CourseCatalogViewModel
         {

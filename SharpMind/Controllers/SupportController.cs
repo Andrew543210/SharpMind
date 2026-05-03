@@ -10,14 +10,14 @@ namespace SharpMind.Controllers;
 
 public class SupportController(ApplicationDbContext dbContext) : Controller
 {
-    [Authorize(Roles = "Student")]
+    [Authorize(Roles = "Student,Mentor")]
     [HttpGet]
     public async Task<IActionResult> Ask()
     {
         return View(new CreateSupportTicketViewModel());
     }
 
-    [Authorize(Roles = "Student")]
+    [Authorize(Roles = "Student,Mentor")]
     [HttpPost]
     public async Task<IActionResult> Ask(CreateSupportTicketViewModel model)
     {
@@ -30,11 +30,11 @@ public class SupportController(ApplicationDbContext dbContext) : Controller
 
         var ticket = new SupportTicket
         {
-            StudentId = userId!,
+            UserId = userId!,
             Subject = model.Subject,
             Message = model.Message,
             CreatedAt = DateTime.UtcNow,
-            IsResolved = false
+            Status = TicketStatus.Pending
         };
 
         dbContext.SupportTickets.Add(ticket);
@@ -44,14 +44,14 @@ public class SupportController(ApplicationDbContext dbContext) : Controller
         return RedirectToAction("MyTickets");
     }
 
-    [Authorize(Roles = "Student")]
+    [Authorize(Roles = "Student,Mentor")]
     [HttpGet]
     public async Task<IActionResult> MyTickets()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         var tickets = await dbContext.SupportTickets
-            .Where(t => t.StudentId == userId)
+            .Where(t => t.UserId == userId)
             .OrderByDescending(t => t.CreatedAt)
             .ToListAsync();
 
@@ -63,14 +63,14 @@ public class SupportController(ApplicationDbContext dbContext) : Controller
     public async Task<IActionResult> AllTickets()
     {
         var tickets = await dbContext.SupportTickets
-            .Include(t => t.Student)
+            .Include(t => t.User)
             .OrderByDescending(t => t.CreatedAt)
             .ToListAsync();
 
         var model = new AdminSupportViewModel
         {
-            Pending = tickets.Where(t => !t.IsResolved).ToList(),
-            Resolved = tickets.Where(t => t.IsResolved).ToList()
+            Pending = tickets.Where(t => t.Status == TicketStatus.Pending).ToList(),
+            Resolved = tickets.Where(t => t.Status == TicketStatus.Resolved).ToList()
         };
 
         return View(model);
@@ -87,13 +87,13 @@ public class SupportController(ApplicationDbContext dbContext) : Controller
             return NotFound();
         }
 
-        ticket.AdminResponse = response;
-        ticket.ResponseAt = DateTime.UtcNow;
-        ticket.IsResolved = true;
+        ticket.AdminReply = response;
+        ticket.ReplyDate = DateTime.UtcNow;
+        ticket.Status = TicketStatus.Resolved;
 
         await dbContext.SaveChangesAsync();
 
-        TempData["Success"] = "Відповідь надіслана студенту.";
+        TempData["Success"] = "Відповідь надіслана.";
         return RedirectToAction(nameof(AllTickets));
     }
 }

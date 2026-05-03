@@ -4,13 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SharpMind.Data;
 using SharpMind.Models;
-using SharpMind.Services;
 using SharpMind.ViewModels.Mentor;
 
 namespace SharpMind.Controllers;
 
 [Authorize(Roles = "Mentor")]
-public class MentorController(ApplicationDbContext dbContext, IProgressService progressService) : Controller
+public class MentorController(ApplicationDbContext dbContext) : Controller
 {
     public async Task<IActionResult> Dashboard()
     {
