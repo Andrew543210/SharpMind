@@ -1,0 +1,90 @@
+@using SharpMind.Services
+@{
+    ViewData["Title"] = "Управління курсами";
+    var courses = (List<(Course Course, CourseStatisticsVm Stats)>)ViewData.Model;
+}
+
+<div class="card soft-card mb-3">
+    <div class="card-body">
+        <h1 class="h4 mb-3">📚 Управління курсами</h1>
+        
+        <div class="row mb-3">
+            <div class="col-md-8">
+                <form method="get" class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Пошук курсу за назвою..." value="@ViewBag.Search" />
+                    <button class="btn btn-mint" type="submit">Пошук</button>
+                </form>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="@Url.Action("EditCourseAdmin", "Admin", new { courseId = 0 })" class="btn btn-success">+ Створити новий курс</a>
+            </div>
+        </div>
+
+        @if (courses.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>№</th>
+                            <th>Назва курсу</th>
+                            <th>Ментор</th>
+                            <th>Рівень</th>
+                            <th>Переглядів</th>
+                            <th>Студентів</th>
+                            <th>Завершено</th>
+                            <th>В процесі</th>
+                            <th>Успішність</th>
+                            <th>Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < courses.Count; i++)
+                        {
+                            var (course, stats) = courses[i];
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td>
+                                    <strong>@course.Title</strong>
+                                    <br />
+                                    <span class="badge @(course.IsPublished ? "bg-success" : "bg-warning")">
+                                        @(course.IsPublished ? "Опублікований" : "Не опублікований")
+                                    </span>
+                                </td>
+                                <td>@course.Mentor?.Email</td>
+                                <td>@course.Level</td>
+                                <td><strong>@stats.TotalViews</strong></td>
+                                <td><strong>@stats.TotalEnrollments</strong></td>
+                                <td><span class="badge bg-success">@stats.Completed</span></td>
+                                <td><span class="badge bg-info">@stats.InProgress</span></td>
+                                <td>
+                                    <div class="progress" style="min-width: 100px;">
+                                        <div class="progress-bar @(stats.CompletionRate >= 70 ? "bg-success" : stats.CompletionRate >= 40 ? "bg-warning" : "bg-danger")" 
+                                             role="progressbar" 
+                                             style="width: @(Math.Min(stats.CompletionRate, 100))%">
+                                            @stats.CompletionRate%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="@Url.Action("EditCourseAdmin", "Admin", new { courseId = course.Id })" class="btn btn-primary btn-sm">Редагувати</a>
+                                        <a href="@Url.Action("CourseStatistics", "Admin", new { courseId = course.Id })" class="btn btn-info btn-sm">Статистика</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                Курси не знайдені. Попросіть менторів створити курси.
+            </div>
+        }
+    </div>
+</div>
+
+

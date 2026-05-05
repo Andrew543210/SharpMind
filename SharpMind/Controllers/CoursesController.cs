@@ -12,7 +12,8 @@ namespace SharpMind.Controllers;
 public class CoursesController(
     ApplicationDbContext dbContext,
     ICourseCatalogService catalogService,
-    IProgressService progressService) : Controller
+    IProgressService progressService,
+    ITestShufflingService testShufflingService) : Controller
 {
     [AllowAnonymous]
     public async Task<IActionResult> Index([FromQuery] CourseFilterViewModel filter)
@@ -230,11 +231,12 @@ public class CoursesController(
             {
                 QuestionId = q.Id,
                 Text = q.Text,
-                Options = q.AnswerOptions.Select(o => new TakeTestViewModel.OptionVm
-                {
-                    OptionId = o.Id,
-                    Text = o.Text
-                }).ToList()
+                Options = testShufflingService.ShuffleAnswerOptions(q.AnswerOptions.ToList())
+                    .Select(o => new TakeTestViewModel.OptionVm
+                    {
+                        OptionId = o.OriginalId,
+                        Text = o.Text
+                    }).ToList()
             }).ToList()
         };
 

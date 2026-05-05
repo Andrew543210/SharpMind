@@ -31,6 +31,7 @@
                     @if (User.IsInRole(AppRoles.Admin))
                     {
                         <li class="nav-item"><a class="nav-link" asp-controller="Admin" asp-action="Dashboard">Адмін панель</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Admin" asp-action="Courses">Статистика курсів</a></li>
                     }
                 </ul>
                 <ul class="navbar-nav">

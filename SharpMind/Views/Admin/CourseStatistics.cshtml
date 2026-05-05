@@ -1,0 +1,166 @@
+@using SharpMind.Services
+@model CourseStatisticsVm
+@{
+    ViewData["Title"] = "Статистика курсу";
+    var enrolledStudents = (List<Enrollment>)ViewBag.EnrolledStudents;
+    var certificateHolders = (List<string>)ViewBag.CertificateHolders;
+}
+
+<div class="card soft-card mb-3">
+    <div class="card-body">
+        <a href="@Url.Action("Courses", "Admin")" class="btn btn-secondary btn-sm mb-3">← Назад до списку курсів</a>
+        <h1 class="h4">📊 Статистика: @Model.CourseName</h1>
+    </div>
+</div>
+
+<!-- Основні метрики -->
+<div class="row mb-3">
+    <div class="col-md-3">
+        <div class="card bg-gradient-blue text-white">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle">Переглядів</h6>
+                <h2 class="card-title">@Model.TotalViews</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-gradient-green text-white">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle">Студентів записано</h6>
+                <h2 class="card-title">@Model.TotalEnrollments</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-gradient-success text-white">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle">Завершило</h6>
+                <h2 class="card-title">@Model.Completed</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-gradient-warning text-white">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle">В процесі</h6>
+                <h2 class="card-title">@Model.InProgress</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Графік прогресу -->
+<div class="card soft-card mb-3">
+    <div class="card-body">
+        <h5>📈 Коефіцієнт завершення</h5>
+        <div style="background: linear-gradient(to right, #f0f0f0 @(100 - Model.CompletionRate)%, #28a745 @(100 - Model.CompletionRate)%); height: 40px; border-radius: 5px; display: flex; align-items: center; justify-content: center;">
+            <strong style="color: @(Model.CompletionRate > 50 ? "white" : "black");">@Model.CompletionRate%</strong>
+        </div>
+        <p class="small text-muted mt-2">@Model.Completed з @Model.TotalEnrollments студентів завершило курс</p>
+    </div>
+</div>
+
+<!-- Статус студентів -->
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="card soft-card">
+            <div class="card-body">
+                <h5>✅ Студенти, які завершили курс (@Model.Completed)</h5>
+                @if (certificateHolders.Any())
+                {
+                    <div class="list-group list-group-sm">
+                        @foreach (var studentId in certificateHolders.Take(10))
+                        {
+                            <div class="list-group-item">
+                                <p class="mb-0">📜 @enrolledStudents.FirstOrDefault(e => e.StudentId == studentId)?.Student?.Email</p>
+                            </div>
+                        }
+                    </div>
+                    @if (certificateHolders.Count > 10)
+                    {
+                        <p class="small text-muted mt-2">і ще @(certificateHolders.Count - 10) студентів...</p>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">Ніхто ще не завершив курс.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card soft-card">
+            <div class="card-body">
+                <h5>⏳ Студенти у процесі вивчення (@Model.InProgress)</h5>
+                @{
+                    var inProgressStudents = enrolledStudents.Where(e => !certificateHolders.Contains(e.StudentId)).ToList();
+                }
+                @if (inProgressStudents.Any())
+                {
+                    <div class="list-group list-group-sm">
+                        @foreach (var enrollment in inProgressStudents.Take(10))
+                        {
+                            <div class="list-group-item">
+                                <p class="mb-0">🎓 @enrollment.Student?.Email</p>
+                            </div>
+                        }
+                    </div>
+                    @if (inProgressStudents.Count > 10)
+                    {
+                        <p class="small text-muted mt-2">і ще @(inProgressStudents.Count - 10) студентів...</p>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">Немає студентів у процесі.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Статистики успіху -->
+<div class="card soft-card">
+    <div class="card-body">
+        <h5>📊 Показники успішності</h5>
+        <table class="table">
+            <tr>
+                <td>Загальна кількість студентів</td>
+                <td><strong>@Model.TotalEnrollments</strong></td>
+            </tr>
+            <tr>
+                <td>Завершили курс</td>
+                <td><strong class="text-success">@Model.Completed (@(Model.TotalEnrollments > 0 ? Math.Round((Model.Completed * 100m) / Model.TotalEnrollments, 1) : 0)%)</strong></td>
+            </tr>
+            <tr>
+                <td>В процесі вивчення</td>
+                <td><strong class="text-info">@Model.InProgress (@(Model.TotalEnrollments > 0 ? Math.Round((Model.InProgress * 100m) / Model.TotalEnrollments, 1) : 0)%)</strong></td>
+            </tr>
+            <tr>
+                <td>Не почали</td>
+                <td><strong class="text-warning">@(Model.TotalEnrollments - Model.Completed - Model.InProgress) (@(Model.TotalEnrollments > 0 ? Math.Round(((Model.TotalEnrollments - Model.Completed - Model.InProgress) * 100m) / Model.TotalEnrollments, 1) : 0)%)</strong></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<style>
+.bg-gradient-blue {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-green {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+</style>
+
+

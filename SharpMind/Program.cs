@@ -32,6 +32,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IProgressService, ProgressService>();
 builder.Services.AddScoped<ICourseCatalogService, CourseCatalogService>();
+builder.Services.AddScoped<ITestShufflingService, TestShufflingService>();
+builder.Services.AddScoped<ICourseStatisticsService, CourseStatisticsService>();
 
 var app = builder.Build();
 

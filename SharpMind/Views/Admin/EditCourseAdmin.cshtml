@@ -1,14 +1,137 @@
-﻿@model Course
+@model Course
+@using SharpMind.Services
 @{
     ViewData["Title"] = "Редагування курсу";
+    var stats = (CourseStatisticsVm)ViewBag.Statistics;
 }
 
 <div class="card soft-card mb-3">
     <div class="card-body">
+        <a href="@Url.Action("Courses", "Admin")" class="btn btn-secondary btn-sm mb-3">← Назад до списку курсів</a>
         <h1 class="h4">@Model.Title</h1>
         <p>@Model.Description</p>
-        <div class="row gap-2">
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#publishModal">Опублікувати курс</button>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <p><strong>Ментор:</strong> @Model.Mentor?.Email</p>
+                <p><strong>Рівень:</strong> @Model.Level</p>
+                <p><strong>Ціна:</strong> $@Model.Price</p>
+            </div>
+            <div class="col-md-6">
+                <p>
+                    <strong>Статус:</strong>
+                    <span class="badge @(Model.IsPublished ? "bg-success" : "bg-warning")">
+                        @(Model.IsPublished ? "Опублікований" : "Не опублікований")
+                    </span>
+                </p>
+                <p><strong>Модулів:</strong> @Model.Modules.Count</p>
+                <p><strong>Студентів:</strong> @stats.TotalEnrollments</p>
+            </div>
+        </div>
+
+        <form asp-action="UpdateCourseAdmin" method="post" class="row g-2 mb-3">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="courseId" value="@Model.Id" />
+            <div class="col-md-5">
+                <label class="form-label">Назва курсу</label>
+                <input type="text" name="title" class="form-control" value="@Model.Title" required />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Ціна</label>
+                <input type="number" name="price" class="form-control" value="@Model.Price" step="0.01" min="0" required />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Рівень</label>
+                <select name="level" class="form-select" required>
+                    <option value="Pochatkovyi" asp-selected='@(Model.Level == CourseLevel.Pochatkovyi)'>Початковий</option>
+                    <option value="Serednii" asp-selected='@(Model.Level == CourseLevel.Serednii)'>Середній</option>
+                    <option value="Prosunutyi" asp-selected='@(Model.Level == CourseLevel.Prosunutyi)'>Просунутий</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Опис</label>
+                <textarea name="description" class="form-control" rows="3" required>@Model.Description</textarea>
+            </div>
+            <div class="col-12 d-grid">
+                <button type="submit" class="btn btn-primary">Зберегти зміни</button>
+            </div>
+        </form>
+
+        <hr />
+
+        <div class="row g-2 mb-3">
+            <div class="col-auto">
+                <form asp-action="ToggleCoursePublish" method="post" style="display:inline;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="courseId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-@(Model.IsPublished ? "warning" : "success")">
+                        @(Model.IsPublished ? "Приховати" : "Опублікувати") курс
+                    </button>
+                </form>
+            </div>
+            <div class="col-auto">
+                <form asp-action="DeleteCourse" method="post" 
+                      onsubmit="return confirm('Ви впевнені, що хочете видалити курс? Це видалить усі дані!')" 
+                      style="display:inline;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="courseId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-danger">Видалити курс</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Статистика -->
+<div class="card soft-card mb-3">
+    <div class="card-body">
+        <h5>📊 Статистика</h5>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">Переглядів</h6>
+                        <h2>@stats.TotalViews</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">Студентів</h6>
+                        <h2>@stats.TotalEnrollments</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">Завершено</h6>
+                        <h2 class="text-success">@stats.Completed</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">В процесі</h6>
+                        <h2 class="text-info">@stats.InProgress</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-3">
+            <p><strong>Коефіцієнт завершення:</strong></p>
+            <div class="progress" style="height: 30px;">
+                <div class="progress-bar @(stats.CompletionRate >= 70 ? "bg-success" : stats.CompletionRate >= 40 ? "bg-warning" : "bg-danger")" 
+                     role="progressbar" 
+                     style="width: @(Math.Min(stats.CompletionRate, 100))%">
+                    @stats.CompletionRate%
+                </div>
+            </div>
+        </div>
+        <div class="mt-3 text-end">
+            <a href="@Url.Action("CourseStatistics", "Admin", new { courseId = Model.Id })" class="btn btn-info">Детальна статистика</a>
         </div>
     </div>
 </div>
@@ -28,6 +151,7 @@
     </div>
 </div>
 
+<!-- МОДУЛІ -->
 @foreach (var module in Model.Modules.OrderBy(m => m.Order))
 {
     <div class="card soft-card mb-3">
@@ -346,18 +470,18 @@
                                                     </div>
                                                 }
                                             }
-                                             <div class="mb-3">
-                                                 <label class="form-label">Номер правильної відповіді</label>
-                                                 @{
-                                                     var correctFinalIndex = question.AnswerOptions.ToList().FindIndex(o => o.IsCorrect) + 1;
-                                                 }
-                                                 <select name="correctOption" class="form-select" required>
-                                                     @for (int i = 1; i <= finalOptions.Count; i++)
-                                                     {
-                                                         <option value="@i" asp-selected='@(i == correctFinalIndex)'>Варіант @i</option>
-                                                     }
-                                                 </select>
-                                             </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Номер правильної відповіді</label>
+                                                @{
+                                                    var correctFinalIndex = question.AnswerOptions.ToList().FindIndex(o => o.IsCorrect) + 1;
+                                                }
+                                                <select name="correctOption" class="form-select" required>
+                                                    @for (int i = 1; i <= finalOptions.Count; i++)
+                                                    {
+                                                        <option value="@i" asp-selected='@(i == correctFinalIndex)'>Варіант @i</option>
+                                                    }
+                                                </select>
+                                            </div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
@@ -387,31 +511,5 @@
     </div>
 </div>
 
-<!-- Modal для опублікування курсу -->
-<div class="modal fade" id="publishModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Опублікувати курс</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Перед публікацією переконайтесь, що:</p>
-                <ul>
-                    <li>✓ Курс має хоча б один модуль</li>
-                    <li>✓ Є фінальний тест з питаннями</li>
-                    <li>✓ Всі матеріали заповнені</li>
-                </ul>
-                <p>Після публікування студенти зможуть записатися на курс.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
-                <form asp-action="PublishCourse" method="post" style="display:inline;">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="courseId" value="@Model.Id" />
-                    <button type="submit" class="btn btn-success">Опублікувати курс</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+
+

@@ -304,6 +304,295 @@ public class MentorController(ApplicationDbContext dbContext) : Controller
         return RedirectToAction(nameof(Submissions));
     }
 
+    // ===================== РЕДАГУВАННЯ КУРСУ - НОВІ МЕТОДИ =====================
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddModuleAtPosition(int courseId, string title, string description, int? position)
+    {
+        var mentorId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var course = await dbContext.Courses.FirstOrDefaultAsync(c => c.Id == courseId && c.MentorId == mentorId);
+        if (course is null)
+        {
+            return NotFound();
+        }
+
+        var targetPosition = position ?? int.MaxValue;
+        var modules = await dbContext.Modules
+            .Where(m => m.CourseId == courseId)
+            .OrderBy(m => m.Order)
+            .ToListAsync();
+
+        // Якщо позиція більше за кількість модулів, додаємо в кінець
+        if (targetPosition > modules.Count)
+        {
+            targetPosition = modules.Count + 1;
+        }
+        else if (targetPosition < 1)
+        {
+            targetPosition = 1;
+        }
+
+        // Змінюємо Order для модулів, які мають Order >= targetPosition
+        foreach (var m in modules.Where(m => m.Order >= targetPosition))
+        {
+            m.Order++;
+        }
+
+        var newModule = new CourseModule
+        {
+            CourseId = courseId,
+            Title = title,
+            Description = description,
+            Order = targetPosition,
+            Test = new Test { Title = $"Quiz for {title}" },
+            PracticalTask = new PracticalTask { Title = $"Task for {title}", Description = "Describe expected implementation and deliverables." }
+        };
+
+        dbContext.Modules.Add(newModule);
+        await dbContext.SaveChangesAsync();
+        TempData["Success"] = $"Module added at position {targetPosition}.";
+
+        return RedirectToAction(nameof(EditCourse), new { courseId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteMaterial(int materialId, int courseId)
+    {
+        if (!await OwnsCourseAsync(courseId))
+        {
+            return NotFound();
+        }
+
+        var material = await dbContext.Materials.FirstOrDefaultAsync(m => m.Id == materialId);
+        if (material is null)
+        {
+            return NotFound();
+        }
+
+        dbContext.Materials.Remove(material);
+        await dbContext.SaveChangesAsync();
+        TempData["Success"] = "Material deleted.";
+
+        return RedirectToAction(nameof(EditCourse), new { courseId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditMaterial(int materialId, int courseId, string title, string content)
+    {
+        if (!await OwnsCourseAsync(courseId))
+        {
+            return NotFound();
+        }
+
+        var material = await dbContext.Materials.FirstOrDefaultAsync(m => m.Id == materialId);
+        if (material is null)
+        {
+            return NotFound();
+        }
+
+        material.Title = title;
+        material.Content = content;
+        await dbContext.SaveChangesAsync();
+        TempData["Success"] = "Material updated.";
+
+        return RedirectToAction(nameof(EditCourse), new { courseId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteQuestion(int questionId, int courseId)
+    {
+        if (!await OwnsCourseAsync(courseId))
+        {
+            return NotFound();
+        }
+
+        var question = await dbContext.Questions
+            .Include(q => q.AnswerOptions)
+            .FirstOrDefaultAsync(q => q.Id == questionId);
+        
+        if (question is null)
+        {
+            return NotFound();
+        }
+
+        dbContext.AnswerOptions.RemoveRange(question.AnswerOptions);
+        dbContext.Questions.Remove(question);
+        await dbContext.SaveChangesAsync();
+        TempData["Success"] = "Question deleted.";
+
+        return RedirectToAction(nameof(EditCourse), new { courseId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditQuestion(int questionId, int courseId, string text, string option1, string option2, string option3, string option4, int correctOption)
+    {
+        if (!await OwnsCourseAsync(courseId))
+        {
+            return NotFound();
+        }
+
+        var question = await dbContext.Questions
+            .Include(q => q.AnswerOptions)
+            .FirstOrDefaultAsync(q => q.Id == questionId);
+        
+        if (question is null)
+        {
+            return NotFound();
+        }
+
+        question.Text = text;
+        
+        // Видаляємо старі варіанти відповідей
+        dbContext.AnswerOptions.RemoveRange(question.AnswerOptions);
+        
+        // Додаємо нові
+        question.AnswerOptions =
+        [
+            new AnswerOption { Text = option1, IsCorrect = correctOption == 1 },
+            new AnswerOption { Text = option2, IsCorrect = correctOption == 2 },
+            new AnswerOption { Text = option3, IsCorrect = correctOption == 3 },
+            new AnswerOption { Text = option4, IsCorrect = correctOption == 4 }
+        ];
+
+        await dbContext.SaveChangesAsync();
+        TempData["Success"] = "Question updated.";
+
+        return RedirectToAction(nameof(EditCourse), new { courseId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditPracticalTask(int taskId, int courseId, string title, string description)
+    {
+        if (!await OwnsCourseAsync(courseId))
+        {
+            return NotFound();
+        }
+
+        var task = await dbContext.PracticalTasks.FirstOrDefaultAsync(t => t.Id == taskId);
+        if (task is null)
+        {
+            return NotFound();
+        }
+
+        task.Title = title;
+        task.Description = description;
+        await dbContext.SaveChangesAsync();
+        TempData["Success"] = "Practical task updated.";
+
+        return RedirectToAction(nameof(EditCourse), new { courseId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteModule(int moduleId, int courseId)
+    {
+        if (!await OwnsCourseAsync(courseId))
+        {
+            return NotFound();
+        }
+
+        var module = await dbContext.Modules
+            .Include(m => m.Materials)
+            .Include(m => m.Test!)
+                .ThenInclude(t => t.Questions)
+                    .ThenInclude(q => q.AnswerOptions)
+            .Include(m => m.PracticalTask)
+            .FirstOrDefaultAsync(m => m.Id == moduleId);
+        
+        if (module is null)
+        {
+            return NotFound();
+        }
+
+        var moduleOrder = module.Order;
+        
+        // Видаляємо матеріали
+        dbContext.Materials.RemoveRange(module.Materials);
+        
+        // Видаляємо тест з питаннями
+        if (module.Test != null)
+        {
+            foreach (var question in module.Test.Questions)
+            {
+                dbContext.AnswerOptions.RemoveRange(question.AnswerOptions);
+            }
+            dbContext.Questions.RemoveRange(module.Test.Questions);
+            dbContext.Tests.Remove(module.Test);
+        }
+        
+        // Видаляємо практичне завдання
+        if (module.PracticalTask != null)
+        {
+            dbContext.PracticalTasks.Remove(module.PracticalTask);
+        }
+        
+        // Видаляємо модуль
+        dbContext.Modules.Remove(module);
+        await dbContext.SaveChangesAsync();
+        
+        // Змінюємо порядок модулів, які йдуть після видаленого
+        var subsequentModules = await dbContext.Modules
+            .Where(m => m.CourseId == courseId && m.Order > moduleOrder)
+            .OrderBy(m => m.Order)
+            .ToListAsync();
+        
+        foreach (var m in subsequentModules)
+        {
+            m.Order--;
+        }
+        
+        await dbContext.SaveChangesAsync();
+        TempData["Success"] = "Module and all its content deleted.";
+
+        return RedirectToAction(nameof(EditCourse), new { courseId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PublishCourse(int courseId)
+    {
+        var mentorId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var course = await dbContext.Courses
+            .Include(c => c.Modules)
+                .ThenInclude(m => m.Test!)
+                    .ThenInclude(t => t.Questions)
+            .Include(c => c.Tests.Where(t => t.IsFinal))
+                .ThenInclude(t => t.Questions)
+            .FirstOrDefaultAsync(c => c.Id == courseId && c.MentorId == mentorId);
+        
+        if (course is null)
+        {
+            return NotFound();
+        }
+
+        // Перевіряємо, що є хоча б один модуль з тестом
+        if (course.Modules.Count == 0)
+        {
+            TempData["Error"] = "Course must have at least one module.";
+            return RedirectToAction(nameof(EditCourse), new { courseId });
+        }
+
+        // Перевіряємо, що є фіналь-тест
+        var finalTest = course.Tests.FirstOrDefault(t => t.IsFinal);
+        if (finalTest is null || finalTest.Questions.Count == 0)
+        {
+            TempData["Error"] = "Course must have a final test with questions.";
+            return RedirectToAction(nameof(EditCourse), new { courseId });
+        }
+
+        course.IsPublished = true;
+        await dbContext.SaveChangesAsync();
+        TempData["Success"] = "Course published successfully!";
+
+        return RedirectToAction(nameof(Dashboard));
+    }
+
     private async Task<bool> OwnsCourseAsync(int courseId)
     {
         var mentorId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
