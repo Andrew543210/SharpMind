@@ -6,6 +6,7 @@
     <title>@ViewData["Title"] - SharpMind</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/modals.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SharpMind.styles.css" asp-append-version="true" />
 </head>
@@ -23,10 +24,12 @@
                     @if (User.IsInRole(AppRoles.Student))
                     {
                         <li class="nav-item"><a class="nav-link" asp-controller="Student" asp-action="Dashboard">Мій кабінет</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Support" asp-action="MyTickets">Мої питання</a></li>
                     }
                     @if (User.IsInRole(AppRoles.Mentor))
                     {
                         <li class="nav-item"><a class="nav-link" asp-controller="Mentor" asp-action="Dashboard">Панель ментора</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Support" asp-action="MyTickets">Мої питання</a></li>
                     }
                     @if (User.IsInRole(AppRoles.Admin))
                     {

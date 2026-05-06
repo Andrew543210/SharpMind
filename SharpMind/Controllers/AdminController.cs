@@ -67,6 +67,46 @@ public class AdminController(
     }
 
     [HttpGet]
+    public IActionResult CreateAdmin()
+    {
+        return View(new CreateMentorViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateAdmin(CreateMentorViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var user = new ApplicationUser
+        {
+            UserName = model.UserName,
+            Email = model.Email,
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(user, model.Password);
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            return View(model);
+        }
+
+        await userManager.AddToRoleAsync(user, AppRoles.Admin);
+        TempData["Success"] = "Адміністратор успішно створений.";
+        return RedirectToAction(nameof(Dashboard));
+    }
+
+    [HttpGet]
     public async Task<IActionResult> ManageRole(string userId)
     {
         var user = await userManager.FindByIdAsync(userId);

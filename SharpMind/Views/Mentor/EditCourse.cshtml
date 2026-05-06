@@ -8,7 +8,7 @@
         <h1 class="h4">@Model.Title</h1>
         <p>@Model.Description</p>
         <div class="row gap-2">
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#publishModal">Опублікувати курс</button>
+            <button class="btn btn-success" onclick="openCustomModal('publishModal')">Опублікувати курс</button>
         </div>
     </div>
 </div>
@@ -59,7 +59,7 @@
                                     <p class="mb-0 small text-muted">@material.Content</p>
                                 </div>
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editMaterialModal@(material.Id)">Редагувати</button>
+                                                    <button type="button" class="btn btn-warning btn-sm" onclick="openCustomModal('editMaterialModal@(material.Id)')">Редагувати</button>
                                     <form asp-action="DeleteMaterial" method="post" style="display:inline;" onsubmit="return confirm('Видалити матеріал?')">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="materialId" value="@material.Id" />
@@ -70,34 +70,32 @@
                             </div>
                         </div>
 
-                        <!-- Modal для редагування матеріалу -->
-                        <div class="modal fade" id="editMaterialModal@(material.Id)" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Редагувати матеріал</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <form asp-action="EditMaterial" method="post">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="materialId" value="@material.Id" />
-                                        <input type="hidden" name="courseId" value="@Model.Id" />
-                                        <div class="modal-body">
-                                            <div class="mb-3">
-                                                <label class="form-label">Назва матеріалу</label>
-                                                <input type="text" name="title" class="form-control" value="@material.Title" required />
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Текст/URL</label>
-                                                <textarea name="content" class="form-control" rows="4" required>@material.Content</textarea>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
-                                            <button type="submit" class="btn btn-primary">Зберегти</button>
-                                        </div>
-                                    </form>
+                        <!-- Custom Modal для редагування матеріалу -->
+                        <div class="custom-modal" id="editMaterialModal@(material.Id)">
+                            <div class="custom-modal-dialog">
+                                <div class="custom-modal-header">
+                                    <h5>Редагувати матеріал</h5>
+                                    <button type="button" class="custom-modal-close-btn" onclick="closeCustomModal('editMaterialModal@(material.Id)')">×</button>
                                 </div>
+                                <form asp-action="EditMaterial" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="materialId" value="@material.Id" />
+                                    <input type="hidden" name="courseId" value="@Model.Id" />
+                                    <div class="custom-modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Назва матеріалу</label>
+                                            <input type="text" name="title" class="form-control" value="@material.Title" required />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Текст/URL</label>
+                                            <textarea name="content" class="form-control" rows="4" required>@material.Content</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="custom-modal-footer">
+                                        <button type="button" class="btn btn-secondary" onclick="closeCustomModal('editMaterialModal@(material.Id)')">Скасувати</button>
+                                        <button type="submit" class="btn btn-primary">Зберегти</button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     }
@@ -137,7 +135,7 @@
                                     </div>
                                 </div>
                                 <div class="btn-group btn-group-sm mt-2" role="group">
-                                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editQuestionModal@(question.Id)">Редагувати</button>
+                                    <button type="button" class="btn btn-warning btn-sm" onclick="openCustomModal('editQuestionModal@(question.Id)')">Редагувати</button>
                                     <form asp-action="DeleteQuestion" method="post" style="display:inline;" onsubmit="return confirm('Видалити питання?')">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="questionId" value="@question.Id" />
@@ -147,52 +145,50 @@
                                 </div>
                             </div>
 
-                            <!-- Modal для редагування питання -->
-                            <div class="modal fade" id="editQuestionModal@(question.Id)" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-                                <div class="modal-dialog modal-lg">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Редагувати питання</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <form asp-action="EditQuestion" method="post">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="questionId" value="@question.Id" />
-                                            <input type="hidden" name="courseId" value="@Model.Id" />
-                                            <div class="modal-body">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Текст питання</label>
-                                                    <textarea name="text" class="form-control" rows="3" required>@question.Text</textarea>
-                                                </div>
-                                                @{
-                                                    var options = question.AnswerOptions.OrderBy(o => question.AnswerOptions.ToList().IndexOf(o)).ToList();
-                                                    for (int i = 0; i < options.Count; i++)
-                                                    {
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Варіант @(i + 1)</label>
-                                                            <input type="text" name="option@(i + 1)" class="form-control" value="@options[i].Text" required />
-                                                        </div>
-                                                    }
-                                                }
-                                                <div class="mb-3">
-                                                    <label class="form-label">Номер правильної відповіді</label>
-                                                    @{
-                                                        var correctOptionIndex = question.AnswerOptions.ToList().FindIndex(o => o.IsCorrect) + 1;
-                                                    }
-                                                    <select name="correctOption" class="form-select" required>
-                                                        @for (int i = 1; i <= options.Count; i++)
-                                                        {
-                                                            <option value="@i" asp-selected='@(i == correctOptionIndex)'>Варіант @i</option>
-                                                        }
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
-                                                <button type="submit" class="btn btn-primary">Зберегти</button>
-                                            </div>
-                                        </form>
+                            <!-- Custom Modal для редагування питання -->
+                            <div class="custom-modal custom-modal-lg" id="editQuestionModal@(question.Id)">
+                                <div class="custom-modal-dialog">
+                                    <div class="custom-modal-header">
+                                        <h5>Редагувати питання</h5>
+                                        <button type="button" class="custom-modal-close-btn" onclick="closeCustomModal('editQuestionModal@(question.Id)')">×</button>
                                     </div>
+                                    <form asp-action="EditQuestion" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="questionId" value="@question.Id" />
+                                        <input type="hidden" name="courseId" value="@Model.Id" />
+                                        <div class="custom-modal-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">Текст питання</label>
+                                                <textarea name="text" class="form-control" rows="3" required>@question.Text</textarea>
+                                            </div>
+                                            @{
+                                                var options = question.AnswerOptions.OrderBy(o => question.AnswerOptions.ToList().IndexOf(o)).ToList();
+                                                for (int i = 0; i < options.Count; i++)
+                                                {
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Варіант @(i + 1)</label>
+                                                        <input type="text" name="option@(i + 1)" class="form-control" value="@options[i].Text" required />
+                                                    </div>
+                                                }
+                                            }
+                                            <div class="mb-3">
+                                                <label class="form-label">Номер правильної відповіді</label>
+                                                @{
+                                                    var correctOptionIndex = question.AnswerOptions.ToList().FindIndex(o => o.IsCorrect) + 1;
+                                                }
+                                                <select name="correctOption" class="form-select" required>
+                                                    @for (int i = 1; i <= options.Count; i++)
+                                                    {
+                                                        <option value="@i" asp-selected='@(i == correctOptionIndex)'>Варіант @i</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="custom-modal-footer">
+                                            <button type="button" class="btn btn-secondary" onclick="closeCustomModal('editQuestionModal@(question.Id)')">Скасувати</button>
+                                            <button type="submit" class="btn btn-primary">Зберегти</button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         }
@@ -222,36 +218,34 @@
                         <p><strong>@module.PracticalTask.Title</strong></p>
                         <p>@module.PracticalTask.Description</p>
                     </div>
-                    <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editTaskModal@(module.PracticalTask.Id)">Редагувати завдання</button>
+                    <button type="button" class="btn btn-warning btn-sm" onclick="openCustomModal('editTaskModal@(module.PracticalTask.Id)')">Редагувати завдання</button>
 
-                    <!-- Modal для редагування практичного завдання -->
-                    <div class="modal fade" id="editTaskModal@(module.PracticalTask.Id)" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Редагувати практичне завдання</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                </div>
-                                <form asp-action="EditPracticalTask" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="taskId" value="@module.PracticalTask.Id" />
-                                    <input type="hidden" name="courseId" value="@Model.Id" />
-                                    <div class="modal-body">
-                                        <div class="mb-3">
-                                            <label class="form-label">Назва завдання</label>
-                                            <input type="text" name="title" class="form-control" value="@module.PracticalTask.Title" required />
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Опис</label>
-                                            <textarea name="description" class="form-control" rows="4" required>@module.PracticalTask.Description</textarea>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
-                                        <button type="submit" class="btn btn-primary">Зберегти</button>
-                                    </div>
-                                </form>
+                    <!-- Custom Modal для редагування практичного завдання -->
+                    <div class="custom-modal" id="editTaskModal@(module.PracticalTask.Id)">
+                        <div class="custom-modal-dialog">
+                            <div class="custom-modal-header">
+                                <h5>Редагувати практичне завдання</h5>
+                                <button type="button" class="custom-modal-close-btn" onclick="closeCustomModal('editTaskModal@(module.PracticalTask.Id)')">×</button>
                             </div>
+                            <form asp-action="EditPracticalTask" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="taskId" value="@module.PracticalTask.Id" />
+                                <input type="hidden" name="courseId" value="@Model.Id" />
+                                <div class="custom-modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Назва завдання</label>
+                                        <input type="text" name="title" class="form-control" value="@module.PracticalTask.Title" required />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Опис</label>
+                                        <textarea name="description" class="form-control" rows="4" required>@module.PracticalTask.Description</textarea>
+                                    </div>
+                                </div>
+                                <div class="custom-modal-footer">
+                                    <button type="button" class="btn btn-secondary" onclick="closeCustomModal('editTaskModal@(module.PracticalTask.Id)')">Скасувати</button>
+                                    <button type="submit" class="btn btn-primary">Зберегти</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -309,7 +303,7 @@
                                 </div>
                             </div>
                             <div class="btn-group btn-group-sm mt-2" role="group">
-                                <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editFinalQuestionModal@(question.Id)">Редагувати</button>
+                                <button type="button" class="btn btn-warning btn-sm" onclick="openCustomModal('editFinalQuestionModal@(question.Id)')">Редагувати</button>
                                 <form asp-action="DeleteQuestion" method="post" style="display:inline;" onsubmit="return confirm('Видалити питання?')">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="questionId" value="@question.Id" />
@@ -319,52 +313,50 @@
                             </div>
                         </div>
 
-                        <!-- Modal для редагування питання фінального тесту -->
-                        <div class="modal fade" id="editFinalQuestionModal@(question.Id)" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Редагувати питання</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <form asp-action="EditQuestion" method="post">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="questionId" value="@question.Id" />
-                                        <input type="hidden" name="courseId" value="@Model.Id" />
-                                        <div class="modal-body">
-                                            <div class="mb-3">
-                                                <label class="form-label">Текст питання</label>
-                                                <textarea name="text" class="form-control" rows="3" required>@question.Text</textarea>
-                                            </div>
-                                            @{
-                                                var finalOptions = question.AnswerOptions.OrderBy(o => question.AnswerOptions.ToList().IndexOf(o)).ToList();
-                                                for (int i = 0; i < finalOptions.Count; i++)
-                                                {
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Варіант @(i + 1)</label>
-                                                        <input type="text" name="option@(i + 1)" class="form-control" value="@finalOptions[i].Text" required />
-                                                    </div>
-                                                }
-                                            }
-                                             <div class="mb-3">
-                                                 <label class="form-label">Номер правильної відповіді</label>
-                                                 @{
-                                                     var correctFinalIndex = question.AnswerOptions.ToList().FindIndex(o => o.IsCorrect) + 1;
-                                                 }
-                                                 <select name="correctOption" class="form-select" required>
-                                                     @for (int i = 1; i <= finalOptions.Count; i++)
-                                                     {
-                                                         <option value="@i" asp-selected='@(i == correctFinalIndex)'>Варіант @i</option>
-                                                     }
-                                                 </select>
-                                             </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
-                                            <button type="submit" class="btn btn-primary">Зберегти</button>
-                                        </div>
-                                    </form>
+                        <!-- Custom Modal для редагування питання фінального тесту -->
+                        <div class="custom-modal custom-modal-lg" id="editFinalQuestionModal@(question.Id)">
+                            <div class="custom-modal-dialog">
+                                <div class="custom-modal-header">
+                                    <h5>Редагувати питання</h5>
+                                    <button type="button" class="custom-modal-close-btn" onclick="closeCustomModal('editFinalQuestionModal@(question.Id)')">×</button>
                                 </div>
+                                <form asp-action="EditQuestion" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="questionId" value="@question.Id" />
+                                    <input type="hidden" name="courseId" value="@Model.Id" />
+                                    <div class="custom-modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Текст питання</label>
+                                            <textarea name="text" class="form-control" rows="3" required>@question.Text</textarea>
+                                        </div>
+                                        @{
+                                            var finalOptions = question.AnswerOptions.OrderBy(o => question.AnswerOptions.ToList().IndexOf(o)).ToList();
+                                            for (int i = 0; i < finalOptions.Count; i++)
+                                            {
+                                                <div class="mb-3">
+                                                    <label class="form-label">Варіант @(i + 1)</label>
+                                                    <input type="text" name="option@(i + 1)" class="form-control" value="@finalOptions[i].Text" required />
+                                                </div>
+                                            }
+                                        }
+                                         <div class="mb-3">
+                                             <label class="form-label">Номер правильної відповіді</label>
+                                             @{
+                                                 var correctFinalIndex = question.AnswerOptions.ToList().FindIndex(o => o.IsCorrect) + 1;
+                                             }
+                                             <select name="correctOption" class="form-select" required>
+                                                 @for (int i = 1; i <= finalOptions.Count; i++)
+                                                 {
+                                                     <option value="@i" asp-selected='@(i == correctFinalIndex)'>Варіант @i</option>
+                                                 }
+                                             </select>
+                                         </div>
+                                    </div>
+                                    <div class="custom-modal-footer">
+                                        <button type="button" class="btn btn-secondary" onclick="closeCustomModal('editFinalQuestionModal@(question.Id)')">Скасувати</button>
+                                        <button type="submit" class="btn btn-primary">Зберегти</button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     }
@@ -387,31 +379,29 @@
     </div>
 </div>
 
-<!-- Modal для опублікування курсу -->
-<div class="modal fade" id="publishModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Опублікувати курс</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Перед публікацією переконайтесь, що:</p>
-                <ul>
-                    <li>✓ Курс має хоча б один модуль</li>
-                    <li>✓ Є фінальний тест з питаннями</li>
-                    <li>✓ Всі матеріали заповнені</li>
-                </ul>
-                <p>Після публікування студенти зможуть записатися на курс.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
-                <form asp-action="PublishCourse" method="post" style="display:inline;">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="courseId" value="@Model.Id" />
-                    <button type="submit" class="btn btn-success">Опублікувати курс</button>
-                </form>
-            </div>
+<!-- Custom Modal для опублікування курсу -->
+<div class="custom-modal" id="publishModal">
+    <div class="custom-modal-dialog">
+        <div class="custom-modal-header">
+            <h5>Опублікувати курс</h5>
+            <button type="button" class="custom-modal-close-btn" onclick="closeCustomModal('publishModal')">×</button>
+        </div>
+        <div class="custom-modal-body">
+            <p>Перед публікацією переконайтесь, що:</p>
+            <ul>
+                <li>✓ Курс має хоча б один модуль</li>
+                <li>✓ Є фінальний тест з питаннями</li>
+                <li>✓ Всі матеріали заповнені</li>
+            </ul>
+            <p>Після публікування студенти зможуть записатися на курс.</p>
+        </div>
+        <div class="custom-modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeCustomModal('publishModal')">Скасувати</button>
+            <form asp-action="PublishCourse" method="post" style="display:inline;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="courseId" value="@Model.Id" />
+                <button type="submit" class="btn btn-success">Опублікувати курс</button>
+            </form>
         </div>
     </div>
 </div>

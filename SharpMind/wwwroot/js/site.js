@@ -3,44 +3,38 @@
 
 // Write your JavaScript code.
 
-// Обробка форм в модальних вікнах для запобігання мигання
-document.addEventListener('DOMContentLoaded', function() {
-    // Знаходимо всі форми в модалях
-    const modalForms = document.querySelectorAll('.modal form');
-    
-    modalForms.forEach(form => {
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
+// Функції для управління користувацькими модалями (замість Bootstrap для запобігання мигання)
+function openCustomModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('show');
+        modal.style.display = 'flex';
+    }
+}
 
-            const formData = new FormData(this);
-            const actionUrl = this.getAttribute('action');
-            const method = this.getAttribute('method') || 'post';
-            const modalElement = this.closest('.modal');
-            const modalInstance = modalElement ? window.bootstrap.Modal.getInstance(modalElement) || new window.bootstrap.Modal(modalElement) : null;
+function closeCustomModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+    }
+}
 
-            try {
-                const response = await fetch(actionUrl, {
-                    method: method.toUpperCase(),
-                    body: formData
-                });
+// Закриття модалі при кліку поза нею
+document.addEventListener('click', function(event) {
+    // Закрити модаль при кліку на фон
+    if (event.target.classList.contains('custom-modal')) {
+        closeCustomModal(event.target.id);
+    }
+});
 
-                if (response.ok) {
-                    // Закриємо модаль
-                    if (modalInstance) {
-                        modalInstance.hide();
-                    }
-                    // Перезавантажимо сторінку після невеликої затримки
-                    setTimeout(() => {
-                        location.reload();
-                    }, 300);
-                } else {
-                    alert('Помилка при збереженні даних.');
-                }
-            } catch (error) {
-                console.error('Помилка:', error);
-                alert('Помилка при відправці форми.');
-            }
+// Закриття модалі при натисканні Escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        // Закрити всі відкриті модалі
+        document.querySelectorAll('.custom-modal.show').forEach(modal => {
+            closeCustomModal(modal.id);
         });
-    });
+    }
 });
 
