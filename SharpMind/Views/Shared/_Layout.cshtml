@@ -38,6 +38,18 @@
                     }
                 </ul>
                 <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <div class="theme-switcher">
+                            <label class="theme-switcher-label">Тема</label>
+                            <div class="theme-switcher-colors">
+                                <div class="theme-color theme-color-light-green" data-theme="light-green" title="Світла зелень"></div>
+                                <div class="theme-color theme-color-dark-blue" data-theme="dark-blue" title="Темний синій"></div>
+                                <div class="theme-color theme-color-beige-brown" data-theme="beige-brown" title="Бежевий"></div>
+                                <div class="theme-color theme-color-purple" data-theme="purple" title="Фіолетовий"></div>
+                                <div class="theme-color theme-color-orange" data-theme="orange" title="Оранжевий"></div>
+                            </div>
+                        </div>
+                    </li>
                     @if (User.Identity?.IsAuthenticated == true)
                     {
                         <li class="nav-item d-flex align-items-center me-2 text-muted small">@User.Identity.Name</li>
