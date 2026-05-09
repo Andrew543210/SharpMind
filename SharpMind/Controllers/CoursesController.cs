@@ -443,28 +443,22 @@ public class CoursesController(
         var existingEnrollment = await dbContext.Enrollments
             .FirstOrDefaultAsync(e => e.CourseId == model.CourseId && e.StudentId == userId);
 
-        if (existingEnrollment != null)
+        if (existingEnrollment == null)
         {
-            if (existingEnrollment.Status != EnrollmentStatus.Approved)
-            {
-                existingEnrollment.Status = EnrollmentStatus.Approved;
-            }
-        }
-        else
-        {
+            // Після оплати створюємо Enrollment зі статусом Pending
+            // Ментор має затвердити заявку
             var enrollment = new Enrollment
             {
                 CourseId = model.CourseId,
                 StudentId = userId!,
-                Status = EnrollmentStatus.Approved,
-                EnrolledAt = DateTime.UtcNow
+                Status = EnrollmentStatus.Pending,
+                RequestedAt = DateTime.UtcNow
             };
             dbContext.Enrollments.Add(enrollment);
+            await dbContext.SaveChangesAsync();
         }
 
-        await dbContext.SaveChangesAsync();
-
-        TempData["Success"] = "Оплата пройшла успішно! Ви тепер маєте доступ до курсу.";
+        TempData["Success"] = "Оплата пройшла успішно! Чекаємо, поки ментор прийме вашу заявку.";
         return RedirectToAction(nameof(Details), new { id = model.CourseId });
     }
 }
