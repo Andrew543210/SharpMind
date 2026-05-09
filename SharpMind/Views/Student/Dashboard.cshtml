@@ -3,68 +3,174 @@
     ViewData["Title"] = "Мій кабінет";
 }
 
-<h1 class="h3 mb-3">Мій кабінет</h1>
+<h1 class="h3 mb-4">Мій кабінет</h1>
 
 @if (Model.Certificates.Any())
 {
-    <h2 class="h4 mb-3">Мої сертифікати</h2>
-    <div class="row g-3 mb-4">
-        @foreach (var cert in Model.Certificates)
-        {
-            <div class="col-md-6">
-                <div class="card soft-card">
-                    <div class="card-body">
-                        <h5>@cert.PlatformName</h5>
-                        <p class="small text-muted">Курс: @cert.CourseName</p>
-                        <p class="small text-muted">Ментор: @cert.MentorName</p>
-                        <p class="small text-muted">Результат: @cert.FinalTestScore.ToString("F1")%</p>
-                        <p class="small text-muted">Дата отримання: @cert.IssueDate.ToLocalTime().ToString("dd.MM.yyyy")</p>
-                        <a class="btn btn-mint btn-sm" asp-action="DownloadCertificate" asp-route-certificateId="@cert.Id" download>Завантажити</a>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-}
-
-<h2 class="h4 mb-3">Мої курси</h2>
-
-@if (!Model.Courses.Any())
-{
-    <div class="alert alert-info">У вас ще немає підтверджених курсів.</div>
-}
-else
-{
-    <div class="row g-3">
-        @foreach (var course in Model.Courses)
-        {
-            <div class="col-md-6">
-                <div class="card soft-card h-100">
-                    <div class="card-body">
-                        <h5>@course.Title</h5>
-                        <p class="small text-muted mb-2">Ментор: @course.MentorName</p>
-                        <div class="progress mint-progress mb-2">
-                            <div class="progress-bar" role="progressbar" style="width:@course.ProgressPercent%">@course.ProgressPercent%</div>
+    <div class="card soft-card mb-4">
+        <div class="card-body">
+            <h2 class="h4 mb-3">Мої сертифікати</h2>
+            <div class="row g-3">
+                @foreach (var cert in Model.Certificates)
+                {
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5>@cert.PlatformName</h5>
+                                <p class="small text-muted">Курс: <strong>@cert.CourseName</strong></p>
+                                <p class="small text-muted">Ментор: @cert.MentorName</p>
+                                <p class="small text-muted">Результат: @cert.FinalTestScore.ToString("F1")%</p>
+                                <p class="small text-muted">Дата отримання: @cert.IssueDate.ToLocalTime().ToString("dd.MM.yyyy")</p>
+                                <a class="btn btn-mint btn-sm" asp-action="DownloadCertificate" asp-route-certificateId="@cert.Id" download>Завантажити</a>
+                            </div>
                         </div>
-                        <p class="small text-muted mb-2">Вимоги для сертифіката: завершити мінімум 4 модулі (тести ≥60%, практичні завдання оцінені) та фінальний тест ≥80%.</p>
-                        <p class="small text-muted mb-2">Рейтинг: @course.RatingPoints балів, місце @course.RatingRank з @course.RatingTotal</p>
-                        <a class="btn btn-outline-mint btn-sm" asp-controller="Courses" asp-action="Details" asp-route-id="@course.CourseId">Перейти до курсу</a>
-                        <a class="btn btn-outline-mint btn-sm ms-2" asp-controller="Courses" asp-action="Rating" asp-route-courseId="@course.CourseId">Рейтинг курсу</a>
-                        @if (course.CanGetCertificate && !course.CertificateId.HasValue)
-                        {
-                            <form asp-action="GenerateCertificate" asp-route-courseId="@course.CourseId" method="post" class="d-inline ms-2">
-                                @Html.AntiForgeryToken()
-                                <button class="btn btn-success btn-sm">Згенерувати сертифікат</button>
-                            </form>
-                        }
-                        @if (course.CertificateId.HasValue)
-                        {
-                            <a class="btn btn-mint btn-sm ms-2" asp-controller="Courses" asp-action="Certificate" asp-route-id="@course.CertificateId.Value">Сертифікат</a>
-                        }
                     </div>
-                </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Вкладки для Активні та Завершені курси -->
+<ul class="nav nav-tabs mb-4" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active-content" type="button" role="tab" aria-controls="active-content" aria-selected="true">
+            📚 Активні курси (<span class="badge bg-success">@Model.ActiveCourses.Count</span>)
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed-content" type="button" role="tab" aria-controls="completed-content" aria-selected="false">
+            ✅ Завершені курси (<span class="badge bg-info">@Model.CompletedCourses.Count</span>)
+        </button>
+    </li>
+</ul>
+
+<!-- Вміст вкладки "Активні курси" -->
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="active-content" role="tabpanel" aria-labelledby="active-tab">
+        @if (!Model.ActiveCourses.Any())
+        {
+            <div class="alert alert-info">
+                <strong>Немає активних курсів.</strong><br>
+                Перейдіть до <a href="@Url.Action("Index", "Courses")">каталогу курсів</a> для пошуку нових курсів.
+            </div>
+        }
+        else
+        {
+            <div class="row g-3">
+                @foreach (var course in Model.ActiveCourses)
+                {
+                    <div class="col-md-6">
+                        <div class="card soft-card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">@course.Title</h5>
+                                <p class="small text-muted mb-2">Ментор: <strong>@course.MentorName</strong></p>
+                                
+                                <!-- Прогрес -->
+                                <p class="small fw-semibold mb-1">Загальний прогрес курсу</p>
+                                <div class="progress mint-progress mb-3" style="height: 25px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width:@course.ProgressPercent%" aria-valuenow="@course.ProgressPercent" aria-valuemin="0" aria-valuemax="100">
+                                        @course.ProgressPercent%
+                                    </div>
+                                </div>
+                                
+                                <!-- Рейтинг -->
+                                <p class="small mb-2">
+                                    <strong>Рейтинг:</strong> @course.RatingPoints балів
+                                    <br>
+                                    <span class="badge bg-warning text-dark">Місце: @course.RatingRank з @course.RatingTotal</span>
+                                </p>
+                                
+                                <!-- Вимоги для сертифіката -->
+                                @if (course.CanGetCertificate)
+                                {
+                                    <div class="alert alert-success alert-sm mb-3">
+                                        ✅ <strong>Вимоги виконані!</strong> Ви можете отримати сертифікат.
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-warning alert-sm mb-3">
+                                        <small><strong>Вимоги для сертифіката:</strong> Завершити мінімум 4 модулі (тести ≥60%, практичні оцінені) та фінальний тест ≥80%.</small>
+                                    </div>
+                                }
+                                
+                                <!-- Кнопки дій -->
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <a class="btn btn-outline-mint btn-sm" asp-controller="Courses" asp-action="Details" asp-route-id="@course.CourseId">
+                                        → Учитися
+                                    </a>
+                                    <a class="btn btn-outline-mint btn-sm" asp-controller="Courses" asp-action="Rating" asp-route-courseId="@course.CourseId">
+                                        📊 Рейтинг
+                                    </a>
+                                    @if (course.CanGetCertificate && !course.CertificateId.HasValue)
+                                    {
+                                        <form asp-action="GenerateCertificate" asp-route-courseId="@course.CourseId" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button class="btn btn-success btn-sm">⭐ Сертифікат</button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
             </div>
         }
     </div>
-}
+
+    <!-- Вміст вкладки "Завершені курси" -->
+    <div class="tab-pane fade" id="completed-content" role="tabpanel" aria-labelledby="completed-tab">
+        @if (!Model.CompletedCourses.Any())
+        {
+            <div class="alert alert-info">
+                Ви ще не завершили жодного курсу. Продовжуйте навчання! 📚
+            </div>
+        }
+        else
+        {
+            <div class="row g-3">
+                @foreach (var course in Model.CompletedCourses)
+                {
+                    <div class="col-md-6">
+                        <div class="card soft-card h-100 border-success">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <span class="badge bg-success">✓ Завершено</span> @course.Title
+                                </h5>
+                                <p class="small text-muted mb-2">Ментор: <strong>@course.MentorName</strong></p>
+                                
+                                <!-- Прогрес (100% для завершеного) -->
+                                <p class="small fw-semibold mb-1">Прогрес курсу</p>
+                                <div class="progress mint-progress mb-3" style="height: 25px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width:100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                                        100%
+                                    </div>
+                                </div>
+                                
+                                <!-- Фінальний рейтинг -->
+                                <p class="small mb-2">
+                                    <strong>Фінальний рейтинг:</strong> @course.RatingPoints балів
+                                    <br>
+                                    <span class="badge bg-info">Місце: @course.RatingRank з @course.RatingTotal</span>
+                                </p>
+                                
+                                <!-- Сертифікат -->
+                                @if (course.CertificateId.HasValue)
+                                {
+                                    <div class="alert alert-success alert-sm mb-3">
+                                        ✅ Сертифікат успішно отриман!
+                                    </div>
+                                    <a class="btn btn-success btn-sm" asp-controller="Courses" asp-action="Certificate" asp-route-id="@course.CertificateId.Value">
+                                        📜 Переглянути сертифікат
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
 

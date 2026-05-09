@@ -21,24 +21,38 @@ public class StudentController(ApplicationDbContext dbContext, IProgressService 
                 .ThenInclude(c => c!.Mentor)
             .ToListAsync();
 
-        var courses = new List<StudentDashboardCourseVm>();
+        var activeCourses = new List<StudentDashboardCourseVm>();
+        var completedCourses = new List<StudentDashboardCourseVm>();
+
         foreach (var enrollment in enrollments)
         {
             var progress = await progressService.GetCourseProgressPercentAsync(enrollment.CourseId, userId);
             var rating = await progressService.GetCourseRatingSummaryAsync(enrollment.CourseId, userId);
             var canGetCertificate = await progressService.CanIssueCertificateAsync(enrollment.CourseId, userId);
-            courses.Add(new StudentDashboardCourseVm
+            var certificateId = await progressService.GetCertificateIdAsync(enrollment.CourseId, userId);
+
+            var courseVm = new StudentDashboardCourseVm
             {
                 CourseId = enrollment.CourseId,
                 Title = enrollment.Course!.Title,
                 MentorName = $"{enrollment.Course.Mentor?.FirstName} {enrollment.Course.Mentor?.LastName}".Trim(),
                 ProgressPercent = progress,
-                CertificateId = await progressService.GetCertificateIdAsync(enrollment.CourseId, userId),
+                CertificateId = certificateId,
                 CanGetCertificate = canGetCertificate,
                 RatingPoints = rating.Points,
                 RatingRank = rating.Rank,
                 RatingTotal = rating.TotalStudents
-            });
+            };
+
+            // Розділяємо на активні та завершені
+            if (certificateId.HasValue)
+            {
+                completedCourses.Add(courseVm);
+            }
+            else
+            {
+                activeCourses.Add(courseVm);
+            }
         }
 
         var certificates = await dbContext.Certificates
@@ -49,7 +63,8 @@ public class StudentController(ApplicationDbContext dbContext, IProgressService 
 
         var model = new StudentDashboardViewModel
         {
-            Courses = courses,
+            ActiveCourses = activeCourses,
+            CompletedCourses = completedCourses,
             Certificates = certificates
         };
 
